@@ -5,10 +5,15 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
+    if (req.method === "OPTIONS") {
+        res.status(200).end()
+        return
+    }
+
     if (req.body.email === rightEmail && req.body.password === rightPassword) {
         res.status(200).json({ result: "success" })
     } else {
-        res.status(500).json({ result: "fail" })
+        res.status(401).json({ result: "fail" })
     }
 }
 
