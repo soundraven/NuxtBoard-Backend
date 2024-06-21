@@ -7,7 +7,7 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "outDir": "./dist",
-        "rootDir": "./"
-    },
-    "include": ["api/**/*.ts"]
+        "rootDir": "./",
+        "typeRoots": ["./node_modules/@types", "./node_modules/@vercel/node"]
+    }
 }

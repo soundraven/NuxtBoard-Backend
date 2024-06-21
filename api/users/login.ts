@@ -1,19 +1,17 @@
 import { VercelRequest, VercelResponse } from "@vercel/node"
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
+    res.setHeader("Access-Control-Allow-Credentials", true)
     res.setHeader("Access-Control-Allow-Origin", "*")
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-    if (req.method === "OPTIONS") {
-        res.status(200).end()
-        return
-    }
+    res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET,OPTIONS,PATCH,DELETE,POST,PUT"
+    )
 
     if (req.body.email === rightEmail && req.body.password === rightPassword) {
-        res.status(200).json({ result: "success" })
+        res.status(200).json({ message: "success" })
     } else {
-        res.status(401).json({ result: "fail" })
+        res.status(401).json({ message: "fail" })
     }
 }
 
