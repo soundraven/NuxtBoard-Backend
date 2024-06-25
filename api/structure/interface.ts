@@ -6,8 +6,8 @@ interface ApiResponse<T> {
 }
 
 interface Userinfo {
-    email?: string
-    password?: string
+    email: string
+    password: string
     id?: number
     username?: string
 }
