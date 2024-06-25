@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import Userinfo from "../structure/userinfo"
+import { Userinfo } from "../structure/interface"
 
 const router = express.Router()
 
@@ -8,6 +8,7 @@ const rightPassword = "1q2w3e4r"
 
 router.post("/login", (req: Request, res: Response) => {
     const userinfo: Userinfo = req.body
+
     if (userinfo.email === rightEmail && userinfo.password === rightPassword) {
         res.status(200).json({ message: "success" })
     } else {
