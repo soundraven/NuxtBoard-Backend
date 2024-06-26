@@ -1,16 +1,16 @@
 import { Request, Response, NextFunction } from "express"
-import pool from "../config/dbPool"
-
-declare module "express-serve-static-core" {
-    interface Request {
-        db?: typeof pool
-    }
-}
+import { connection } from "../index"
 
 const dbMiddleware = () => {
     return (req: Request, res: Response, next: NextFunction) => {
-        req.db = pool
-        next()
+        if (connection) {
+            ;(req as any).db = connection
+            next()
+        } else {
+            res.status(500).json({
+                message: "Database connection not available",
+            })
+        }
     }
 }
 

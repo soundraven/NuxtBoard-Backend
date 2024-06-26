@@ -6,8 +6,9 @@ import dotenv from "dotenv"
 dotenv.config()
 
 const router = express.Router()
+console.log(router)
 
-router.post("/register", async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
     console.log("Received request:", req.body)
 
     const userinfo: Userinfo = req.body
@@ -17,12 +18,18 @@ router.post("/register", async (req: Request, res: Response) => {
         .digest("hex")
 
     try {
-        if (!req.db) {
-            console.error("Database not initialized")
+        const db = (req as any).db
+        if (!db) {
+            console.log("Database not initialized")
             return res.status(500).json({ message: "Database not initialized" })
         }
 
-        const [result] = await req.db.execute(
+        if (!req.body) {
+            console.error("userinfo not exist")
+            return res.status(500).json({ message: "userinfo not exist" })
+        }
+
+        const [result] = await db.execute(
             "INSERT INTO userinfo (email, password) VALUES (?, ?)",
             [userinfo.email, encryptedPassword]
         )
