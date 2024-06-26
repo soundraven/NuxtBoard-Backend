@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express"
 import { Userinfo } from "../structure/interface"
-import pool from "../config/dbPool"
 import crypto from "crypto"
 import dotenv from "dotenv"
 
@@ -16,8 +15,12 @@ router.post("/register", async (req: Request, res: Response) => {
         .digest("hex")
 
     try {
-        const [result] = await pool.execute(
-            `INSERT INTO userinfo (email, password) VALUES (?, ?)`,
+        if (!req.db) {
+            return res.status(500).json({ message: "Database not initialized" })
+        }
+
+        const [result] = await req.db.execute(
+            "INSERT INTO userinfo (email, password) VALUES (?, ?)",
             [userinfo.email, encryptedPassword]
         )
 
@@ -28,7 +31,7 @@ router.post("/register", async (req: Request, res: Response) => {
         } else {
             res.status(400).json({
                 message: "fail",
-                error: "Unknown error occured",
+                error: "Unknown error occurred",
             })
         }
     }
