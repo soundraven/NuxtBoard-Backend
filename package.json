@@ -1,27 +1,31 @@
 {
-  "name": "nuxtboard-backend",
-  "version": "1.0.0",
-  "description": "Vercel serverless functions",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "crypto": "^1.0.1",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "google-auth-library": "^9.11.0",
-    "googleapis": "^140.0.0",
-    "mysql2": "^3.10.1"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.14.7",
-    "typescript": "^5.5.2"
-  }
+    "name": "nuxtboard-backend",
+    "version": "1.0.0",
+    "description": "Vercel serverless functions",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "ts-node ./api/index.ts",
+        "dev": "nodemon --watch ./src --ext ts --exec ts-node ./api/index.ts"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "cors": "^2.8.5",
+        "crypto": "^1.0.1",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
+        "google-auth-library": "^9.11.0",
+        "googleapis": "^140.0.0",
+        "mysql2": "^3.10.1"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/node": "^20.14.9",
+        "nodemon": "^3.1.4",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.5.2"
+    }
 }

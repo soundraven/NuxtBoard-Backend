@@ -1,17 +1,13 @@
-import { Request, Response, NextFunction } from "express"
-import { Pool } from "mysql2/promise"
+import mysql from "mysql2/promise"
 
-declare module "express-serve-static-core" {
-    interface Request {
-        db?: Pool
-    }
-}
+const pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+})
 
-const dbMiddleware = (pool: Pool) => {
-    return (req: Request, res: Response, next: NextFunction) => {
-        req.db = pool
-        next()
-    }
-}
-
-export default dbMiddleware
+export default pool

@@ -8,6 +8,8 @@ dotenv.config()
 const router = express.Router()
 
 router.post("/register", async (req: Request, res: Response) => {
+    console.log("Received request:", req.body)
+
     const userinfo: Userinfo = req.body
     const encryptedPassword = crypto
         .createHash("sha256")
@@ -16,6 +18,7 @@ router.post("/register", async (req: Request, res: Response) => {
 
     try {
         if (!req.db) {
+            console.error("Database not initialized")
             return res.status(500).json({ message: "Database not initialized" })
         }
 
@@ -24,11 +27,14 @@ router.post("/register", async (req: Request, res: Response) => {
             [userinfo.email, encryptedPassword]
         )
 
+        console.log("User registered successfully:", result)
         res.status(201).json({ message: "success" })
     } catch (error) {
         if (error instanceof Error) {
+            console.error("Error:", error.message)
             res.status(400).json({ message: "fail", error: error.message })
         } else {
+            console.error("Unknown error occurred")
             res.status(400).json({
                 message: "fail",
                 error: "Unknown error occurred",
