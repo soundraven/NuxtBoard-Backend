@@ -3,7 +3,6 @@ import cors from "cors"
 import corsOptions from "./config/corsOptions"
 import mysql, { Connection } from "mysql2/promise"
 import dotenv from "dotenv"
-import dbMiddleware from "./middlewares/dbMiddleware"
 
 import loginRoute from "./users/login"
 import registerRoute from "./users/register"
@@ -16,11 +15,6 @@ app.use(cors(corsOptions))
 app.options("*", cors(corsOptions))
 
 app.use(express.json())
-
-app.use(dbMiddleware())
-
-app.use("/api/users/login", loginRoute)
-app.use("/api/users/register", registerRoute)
 
 app.listen(process.env.DB_PORT, () => {
     console.log(`open server ${process.env.DB_PORT}`)
@@ -42,5 +36,8 @@ async function startServer() {
 }
 
 startServer()
+
+app.use("/api/users/login", loginRoute)
+app.use("/api/users/register", registerRoute)
 
 export default app
