@@ -1,8 +1,8 @@
-interface ApiResponse<T> {
-    status: number
+interface ApiResponse {
+    code: string
+    errorcode?: string
     message: string
-    data?: T
-    error?: string
+    data?: any
 }
 
 interface Userinfo {

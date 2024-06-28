@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { Userinfo } from "../structure/interface"
+import { Userinfo, ApiResponse } from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
@@ -8,17 +8,19 @@ import { connection } from "../index"
 dotenv.config()
 
 const router = express.Router()
-console.log(router)
 
 router.post("/", async (req: Request, res: Response) => {
-    console.log("Received request:", req.body)
-    if (!req.body) {
-        console.error("userinfo not exist")
-        return res.status(500).json({ message: "userinfo not exist" })
-    }
-
     if (!connection) {
         throw new Error("Database connection not available")
+    }
+
+    if (!req.body) {
+        console.error("userinfo not exist")
+        return res.status(500).json({
+            code: "E",
+            errorcode: "001",
+            message: "userinfo not exist",
+        })
     }
 
     const userinfo: Userinfo = req.body
@@ -28,13 +30,12 @@ router.post("/", async (req: Request, res: Response) => {
         .digest("hex")
 
     try {
-        const [result] = await connection.query(
-            "INSERT INTO userinfo (email, password) VALUES (?, ?)",
-            [userinfo.email, encryptedPassword]
+        await connection.query(
+            "INSERT INTO userinfo (email, password, username) VALUES (?, ?, ?)",
+            [userinfo.email, encryptedPassword, userinfo.username]
         )
 
-        console.log("User registered successfully:", result)
-        res.status(201).json({ message: "success" })
+        res.status(200).json({ code: "S", message: "success" } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
     }
