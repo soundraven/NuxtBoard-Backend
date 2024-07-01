@@ -1,7 +1,7 @@
 interface ApiResponse {
     code: string
-    errorcode?: string
     message: string
+    errorCode?: string
     data?: any
 }
 
@@ -12,4 +12,4 @@ interface Userinfo {
     username?: string
 }
 
-export { Userinfo, ApiResponse }
+export type { Userinfo, ApiResponse }

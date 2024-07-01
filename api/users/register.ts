@@ -11,16 +11,15 @@ const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
     if (!connection) {
-        throw new Error("Database connection not available")
+        return errorHandler(res, new Error("Database connection not available"))
     }
 
     if (!req.body) {
-        console.error("userinfo not exist")
-        return res.status(500).json({
+        return res.status(400).json({
             code: "E",
-            errorcode: "001",
+            errorCode: "001",
             message: "userinfo not exist",
-        })
+        } as ApiResponse)
     }
 
     const userinfo: Userinfo = req.body
@@ -30,12 +29,30 @@ router.post("/", async (req: Request, res: Response) => {
         .digest("hex")
 
     try {
+        const [duplicateCheck] = await connection.query(
+            `SELECT COUNT('email') AS 'count'
+        FROM 'userinfo'
+        WHERE 'email' = ?`,
+            [req.body.email]
+        )
+
+        if (duplicateCheck[0].count > 0) {
+            return res.status(400).json({
+                code: "E",
+                errorCode: "002",
+                message: "email already exist",
+            } as ApiResponse)
+        }
+
         await connection.query(
-            "INSERT INTO userinfo (email, password, username) VALUES (?, ?, ?)",
+            `INSERT INTO userinfo (email, password, username) VALUES (?, ?, ?)`,
             [userinfo.email, encryptedPassword, userinfo.username]
         )
 
-        res.status(200).json({ code: "S", message: "success" } as ApiResponse)
+        res.status(200).json({
+            code: "S",
+            message: "Login success",
+        } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
     }
