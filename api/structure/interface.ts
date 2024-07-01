@@ -1,3 +1,5 @@
+import { RowDataPacket } from "mysql2"
+
 interface ApiResponse {
     code: string
     message: string
@@ -12,4 +14,8 @@ interface Userinfo {
     username?: string
 }
 
-export type { Userinfo, ApiResponse }
+interface CountResult extends RowDataPacket {
+    count: number
+}
+
+export type { Userinfo, ApiResponse, CountResult }

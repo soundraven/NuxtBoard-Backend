@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { Userinfo, ApiResponse } from "../structure/interface"
+import { Userinfo, ApiResponse, CountResult } from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
@@ -23,35 +23,39 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     const userinfo: Userinfo = req.body
-    const encryptedPassword = crypto
+    const encryptedPassword: string = crypto
         .createHash("sha256")
         .update(userinfo.password + process.env.PWSALT)
         .digest("hex")
 
-    try {
-        const [duplicateCheck] = await connection.query(
-            `SELECT COUNT('email') AS 'count'
-        FROM 'userinfo'
-        WHERE 'email' = ?`,
-            [req.body.email]
-        )
+    const duplicateCheck = `SELECT COUNT(email) AS count
+        FROM userinfo
+        WHERE email = ?`
 
-        if (duplicateCheck[0].count > 0) {
+    const regist = `INSERT INTO userinfo (email, password, username) VALUES (?, ?, ?)`
+
+    try {
+        const [result] = await connection.query<CountResult[]>(duplicateCheck, [
+            userinfo.email,
+        ])
+
+        if (result[0].count > 0) {
             return res.status(400).json({
                 code: "E",
                 errorCode: "002",
-                message: "email already exist",
+                message: "Email already exist",
             } as ApiResponse)
         }
 
-        await connection.query(
-            `INSERT INTO userinfo (email, password, username) VALUES (?, ?, ?)`,
-            [userinfo.email, encryptedPassword, userinfo.username]
-        )
+        await connection.query(regist, [
+            userinfo.email,
+            encryptedPassword,
+            userinfo.username,
+        ])
 
         res.status(200).json({
             code: "S",
-            message: "Login success",
+            message: "Registration success",
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
