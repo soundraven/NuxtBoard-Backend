@@ -14,7 +14,7 @@ interface Userinfo {
     username?: string
 }
 
-interface CountResult extends RowDataPacket {
+interface CountResult {
     count: number
 }
 

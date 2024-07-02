@@ -4,6 +4,7 @@ import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
+import { RowDataPacket } from "mysql2"
 
 dotenv.config()
 
@@ -35,15 +36,15 @@ router.post("/", async (req: Request, res: Response) => {
     const regist = `INSERT INTO userinfo (email, password, username) VALUES (?, ?, ?)`
 
     try {
-        const [result] = await connection.query<CountResult[]>(duplicateCheck, [
-            userinfo.email,
-        ])
+        const [result] = await connection.query<
+            CountResult[] & RowDataPacket[]
+        >(duplicateCheck, [userinfo.email])
 
         if (result[0].count > 0) {
-            return res.status(400).json({
+            return res.status(401).json({
                 code: "E",
                 errorCode: "002",
-                message: "Email already exist",
+                message: "Email already exist.",
             } as ApiResponse)
         }
 
@@ -55,7 +56,7 @@ router.post("/", async (req: Request, res: Response) => {
 
         res.status(200).json({
             code: "S",
-            message: "Registration success",
+            message: "Registration success.",
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
