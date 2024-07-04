@@ -7,6 +7,7 @@ import dotenv from "dotenv"
 import loginRoute from "./users/login"
 import registerRoute from "./users/register"
 import listRoute from "./posts/list"
+import postinfoRoute from "./posts/postinfo"
 
 dotenv.config()
 
@@ -41,5 +42,6 @@ startServer()
 app.use("/api/users/login", loginRoute)
 app.use("/api/users/register", registerRoute)
 app.use("/api/posts/list", listRoute)
+app.use("/api/posts/postinfo", postinfoRoute)
 
 export default app
