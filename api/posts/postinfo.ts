@@ -9,12 +9,14 @@ dotenv.config()
 
 const router = express.Router()
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/:id", async (req: Request, res: Response) => {
     if (!connection) {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const getPostList = `SELECT 
+    const postId = req.params.id
+
+    const getPostinfo = `SELECT 
         post.*,
         boardinfo.board_id AS boardinfo_board_id,
         boardinfo.board_name
@@ -22,17 +24,21 @@ router.get("/", async (req: Request, res: Response) => {
         post
     LEFT JOIN 
         boardinfo ON post.board_id = boardinfo.board_id
-    ORDER BY
-        post.id DESC
-    LIMIT 20`
+    WHERE
+        post.id = ?`
 
     try {
-        const [postList] = await connection.query<RowDataPacket[]>(getPostList)
+        const [postinfo] = await connection.query<RowDataPacket[]>(
+            getPostinfo,
+            [postId]
+        )
+
+        console.log(postinfo)
 
         res.status(200).json({
             code: "S",
             message: "Successfully get list of posts",
-            data: postList,
+            data: postinfo,
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
