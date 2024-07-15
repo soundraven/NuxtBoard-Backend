@@ -14,6 +14,16 @@ router.get("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
+    const { currentPage, pageSize } = req.query as {
+        currentPage: string
+        pageSize: string
+    }
+
+    const currentPageNum = parseInt(currentPage) - 1 //프론트에선 현재 페이지 1 기준 시작
+    const pageSizeNum = parseInt(pageSize)
+
+    const listSize = currentPageNum * pageSizeNum
+
     const getPostList = `SELECT 
         post.*,
         boardinfo.board_id AS boardinfo_board_id,
@@ -24,15 +34,34 @@ router.get("/", async (req: Request, res: Response) => {
         boardinfo ON post.board_id = boardinfo.board_id
     ORDER BY
         post.id DESC
-    LIMIT 20`
+    LIMIT ?,?`
+
+    const getCount = `
+        SELECT COUNT(*) as totalPosts
+        FROM post
+    `
 
     try {
-        const [postList] = await connection.query<RowDataPacket[]>(getPostList)
+        const [postListResult, countResult] = await Promise.all([
+            connection.execute<RowDataPacket[]>(getPostList, [
+                listSize,
+                pageSizeNum,
+            ]),
+            connection.query<RowDataPacket[]>(getCount),
+        ])
+
+        const [postList] = postListResult
+        const [totalPosts] = countResult
+        const totalCount: number = (
+            totalPosts[0] as {
+                totalPosts: number
+            }
+        ).totalPosts
 
         res.status(200).json({
             code: "S",
             message: "Successfully get list of posts",
-            data: postList,
+            data: { postList, totalCount },
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)

@@ -14,7 +14,6 @@ router.get("/:id", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    console.log(req.params)
     const postId = req.params.id
 
     const getPostinfo = `SELECT 
@@ -33,8 +32,6 @@ router.get("/:id", async (req: Request, res: Response) => {
             getPostinfo,
             [postId]
         )
-
-        console.log(postinfo)
 
         res.status(200).json({
             code: "S",
