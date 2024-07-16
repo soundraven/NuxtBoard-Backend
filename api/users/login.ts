@@ -31,6 +31,8 @@ router.post("/", async (req: Request, res: Response) => {
 
     const selectEmail = `SELECT COUNT(*) as count FROM userinfo WHERE email = ?`
     const selectUserinfo = `SELECT email, password FROM userinfo WHERE email = ?`
+    const getUser = `SELECT email, id, username FROM userinfo WHERE email = ?`
+    const insertToken = `INSERT INTO user_auths (token, registered_by, expires) VALUES (?, ?, FROM_UNIXTIME(?))`
 
     try {
         const [countResult] = await connection.query<
@@ -49,15 +51,31 @@ router.post("/", async (req: Request, res: Response) => {
             Userinfo[] & RowDataPacket[]
         >(selectUserinfo, [userinfo.email])
 
-        console.log(userinfo, dbUserinfo[0])
-
         if (
             dbUserinfo[0].email === userinfo.email &&
             dbUserinfo[0].password === encryptedPassword
         ) {
+            const [user] = await connection.query<Userinfo[] & RowDataPacket[]>(
+                getUser,
+                [userinfo.email]
+            )
+
+            let token =
+                userinfo.email +
+                Math.floor(Math.random() * 1000000).toString() +
+                new Date().getTime().toString()
+
+            token = crypto.createHash("sha256").update(token).digest("hex")
+
+            const expires =
+                Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24 * 7
+
+            await connection.query(insertToken, [token, user[0].id, expires])
+
             res.status(200).json({
                 code: "S",
                 message: "Login success",
+                data: { user: user[0], token: token },
             } as ApiResponse)
         } else {
             res.status(401).json({
