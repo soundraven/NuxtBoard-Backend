@@ -6,9 +6,12 @@ import dotenv from "dotenv"
 
 import loginRoute from "./users/login"
 import registerRoute from "./users/register"
-import validateToken from "./middlewares/validateToken"
+import deactivateRoute from "./users/deactive"
+
 import listRoute from "./posts/list"
 import postinfoRoute from "./posts/postinfo"
+
+import validateToken from "./middlewares/validateToken"
 
 dotenv.config()
 
@@ -49,5 +52,6 @@ app.use("/api/users/login", loginRoute)
 app.use("/api/users/register", registerRoute)
 
 app.use(validateToken)
+app.use("/api/users/deactivate", deactivateRoute)
 
 export default app

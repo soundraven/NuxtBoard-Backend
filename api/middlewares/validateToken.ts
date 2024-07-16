@@ -9,7 +9,7 @@ const selectToken = `SELECT *
         WHERE token = ? AND expires > NOW()`
 
 const selectUser = `SELECT id, email, username, registered_date
-        FROM userdata 
+        FROM userinfo 
         WHERE id = ?`
 
 export default async function validateToken(
@@ -21,7 +21,7 @@ export default async function validateToken(
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const token = (req.headers["authentification"] as string) || ""
+    const token = req.headers["authorization"]?.split(" ")[1] || ""
 
     if (token == "") {
         res.status(401).json({
@@ -60,7 +60,7 @@ export default async function validateToken(
             } as ApiResponse)
         }
 
-        res.locals.user = user[0]
+        res.locals.validatedUser = { user: user[0], token: token }
         next()
     } catch (error) {
         errorHandler(res, error as Error)
