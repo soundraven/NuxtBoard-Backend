@@ -1,10 +1,9 @@
-import { RowDataPacket } from "mysql2"
-
 interface ApiResponse {
-    code: string
+    code: "S" | "E" | "F"
     message: string
     errorCode?: string
-    data?: any
+    user?: Userinfo
+    token?: string
 }
 
 interface Userinfo {

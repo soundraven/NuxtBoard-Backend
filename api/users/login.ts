@@ -15,7 +15,7 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    if (!req.body) {
+    if (!req.body.user) {
         return res.status(400).json({
             code: "E",
             errorCode: "001",
@@ -23,7 +23,7 @@ router.post("/", async (req: Request, res: Response) => {
         } as ApiResponse)
     }
 
-    const userinfo: Userinfo = req.body
+    const userinfo: Userinfo = req.body.user
     const encryptedPassword = crypto
         .createHash("sha256")
         .update(userinfo.password + process.env.PWSALT)
@@ -75,7 +75,8 @@ router.post("/", async (req: Request, res: Response) => {
             res.status(200).json({
                 code: "S",
                 message: "Login success",
-                data: { user: user[0], token: token },
+                user: user[0],
+                token: token,
             } as ApiResponse)
         } else {
             res.status(401).json({

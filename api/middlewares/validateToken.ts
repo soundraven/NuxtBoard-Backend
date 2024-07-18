@@ -23,7 +23,7 @@ export default async function validateToken(
 
     const token = req.headers["authorization"]?.split(" ")[1] || ""
 
-    if (token == "") {
+    if (token === "") {
         res.status(401).json({
             code: "F",
             message: "Auth failed",

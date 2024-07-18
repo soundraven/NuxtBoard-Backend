@@ -6,6 +6,7 @@ import dotenv from "dotenv"
 
 import loginRoute from "./users/login"
 import registerRoute from "./users/register"
+import autoLoginRoute from "./users/me"
 import deactivateRoute from "./users/deactive"
 
 import listRoute from "./posts/list"
@@ -45,6 +46,8 @@ async function startServer() {
 
 startServer()
 
+app.use("/api/validate", validateToken)
+
 app.use("/api/posts/list", listRoute)
 app.use("/api/posts/postinfo", postinfoRoute)
 
@@ -53,5 +56,6 @@ app.use("/api/users/register", registerRoute)
 
 app.use(validateToken)
 app.use("/api/users/deactivate", deactivateRoute)
+app.use("/api/users/me", autoLoginRoute)
 
 export default app
