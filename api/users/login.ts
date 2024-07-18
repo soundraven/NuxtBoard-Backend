@@ -15,7 +15,7 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    if (!req.body.user) {
+    if (!req.body.user.email || !req.body.user.password) {
         return res.status(400).json({
             code: "E",
             errorCode: "001",
@@ -24,7 +24,7 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     const userinfo: Userinfo = req.body.user
-    const encryptedPassword = crypto
+    const encryptedPassword: string = crypto
         .createHash("sha256")
         .update(userinfo.password + process.env.PWSALT)
         .digest("hex")

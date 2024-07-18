@@ -51,6 +51,18 @@ router.get("/", async (req: Request, res: Response) => {
         ])
 
         const [postList] = postListResult
+        // console.log(postList)
+        const groupedPost = postList.reduce((acc: any, post) => {
+            const key = post.board_id
+            if (!acc[key]) {
+                acc[key] = []
+            }
+
+            acc[key].push(post)
+            return acc
+        }, {})
+
+        console.log(groupedPost)
         const [totalPosts] = countResult
         const totalCount: number = (
             totalPosts[0] as {
@@ -61,7 +73,9 @@ router.get("/", async (req: Request, res: Response) => {
         res.status(200).json({
             code: "S",
             message: "Successfully get list of posts",
-            data: { postList, totalCount },
+            postList: postList,
+            totalCount: totalCount,
+            groupedPost: groupedPost,
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
