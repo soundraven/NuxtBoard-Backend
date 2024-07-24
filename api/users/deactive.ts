@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express"
-import { Userinfo, ApiResponse, CountResult } from "../structure/interface"
-import crypto from "crypto"
+import { ApiResponse } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -25,8 +24,11 @@ router.post("/", async (req: Request, res: Response) => {
 
     const validatedUser = res.locals.validatedUser
     console.log(validatedUser)
+    console.log(req.body.user)
+    console.log(req.headers["authorization"]?.split(" ")[1] || "")
 
-    const { user, token } = req.body
+    const user = req.body.user
+    const token = req.headers["authorization"]?.split(" ")[1] || ""
 
     const deactivateQuery = ` UPDATE userinfo
         SET active = 0
@@ -49,7 +51,7 @@ router.post("/", async (req: Request, res: Response) => {
         )
 
         if (deactivate.affectedRows === 0) {
-            return res.status(404).json({
+            return res.status(401).json({
                 code: "F",
                 message: "User not found",
             } as ApiResponse)

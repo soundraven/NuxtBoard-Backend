@@ -21,6 +21,8 @@ export default async function validateToken(
         return errorHandler(res, new Error("Database connection not available"))
     }
 
+    console.log("middlewares")
+
     const token = req.headers["authorization"]?.split(" ")[1] || ""
 
     if (token === "") {
