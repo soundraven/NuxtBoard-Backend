@@ -26,5 +26,15 @@ enum BoardId {
     후기 = 6,
 }
 
-export type { Userinfo, ApiResponse, CountResult }
+interface Postinfo {
+    id: number
+    board_id: number
+    registered_by: number
+    registered_date: number
+    title: string
+    content: string
+    formatted_date?: Dayjs
+}
+
+export type { Userinfo, ApiResponse, CountResult, Postinfo }
 export { BoardId }
