@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
+import dayjs from "dayjs"
 
 dotenv.config()
 
@@ -61,6 +62,17 @@ router.get("/", async (req: Request, res: Response) => {
             acc[key].push(post)
             return acc
         }, {})
+
+        Object.keys(groupedPost).forEach((key) => {
+            groupedPost[key] = groupedPost[key].map((item: any) => {
+                return {
+                    ...item,
+                    formatted_date: dayjs(item.registered_date).format(
+                        "YYYY-MM-DD HH:mm:ss"
+                    ),
+                }
+            })
+        })
 
         const [totalPosts] = countResult
         const totalCount: number = (
