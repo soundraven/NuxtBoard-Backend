@@ -1,10 +1,15 @@
 import express, { Request, Response } from "express"
-import { ApiResponse } from "../structure/interface"
+import {
+    ApiResponse,
+    GroupedPost,
+    Postinfo,
+    CountResult,
+} from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
-import dayjs from "dayjs"
+import dayjs, { Dayjs } from "dayjs"
 
 dotenv.config()
 
@@ -43,43 +48,44 @@ router.get("/", async (req: Request, res: Response) => {
     `
 
     try {
-        const [postListResult, countResult] = await Promise.all([
-            connection.execute<RowDataPacket[]>(getPostList, [
-                listSize,
-                pageSizeNum,
-            ]),
-            connection.query<RowDataPacket[]>(getCount),
-        ])
+        const [postListResult] = await connection.execute<RowDataPacket[]>(
+            getPostList,
+            [listSize, pageSizeNum]
+        )
 
-        const [postList] = postListResult
+        const [countResult] = await connection.query<RowDataPacket[]>(getCount)
 
-        const groupedPost = postList.reduce((acc: any, post) => {
-            const key = post.board_id
-            if (!acc[key]) {
-                acc[key] = []
-            }
+        const postList = postListResult as Postinfo[]
 
-            acc[key].push(post)
-            return acc
-        }, {})
-
-        Object.keys(groupedPost).forEach((key) => {
-            groupedPost[key] = groupedPost[key].map((item: any) => {
-                return {
-                    ...item,
-                    formatted_date: dayjs(item.registered_date).format(
-                        "YYYY-MM-DD HH:mm:ss"
-                    ),
+        const groupedPost: GroupedPost = postList.reduce(
+            (acc: GroupedPost, post: Postinfo) => {
+                const key: number = post.board_id
+                if (!acc[key]) {
+                    acc[key] = []
                 }
-            })
+
+                acc[key].push(post)
+                return acc
+            },
+            {}
+        )
+
+        Object.keys(groupedPost).forEach((key: string) => {
+            const numberKey = Number(key)
+
+            groupedPost[numberKey] = groupedPost[numberKey].map(
+                (item: Postinfo) => {
+                    return {
+                        ...item,
+                        formatted_date: dayjs(item.registered_date).format(
+                            "YYYY-MM-DD HH:mm:ss"
+                        ),
+                    }
+                }
+            )
         })
 
-        const [totalPosts] = countResult
-        const totalCount: number = (
-            totalPosts[0] as {
-                totalPosts: number
-            }
-        ).totalPosts
+        const totalCount: number = countResult[0].totalPosts
 
         res.status(200).json({
             code: "S",

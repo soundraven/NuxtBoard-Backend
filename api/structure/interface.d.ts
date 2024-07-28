@@ -4,6 +4,8 @@ interface ApiResponse {
     errorCode?: string
     user?: Userinfo
     token?: string
+    postList?: Postinfo[]
+    totalCount?: number
 }
 
 interface Userinfo {
@@ -36,5 +38,9 @@ interface Postinfo {
     formatted_date?: Dayjs
 }
 
-export type { Userinfo, ApiResponse, CountResult, Postinfo }
+interface GroupedPost {
+    [key: number]: Postinfo[]
+}
+
+export type { Userinfo, ApiResponse, CountResult, Postinfo, GroupedPost }
 export { BoardId }
