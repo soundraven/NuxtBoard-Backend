@@ -9,11 +9,17 @@ import registerRoute from "./users/register"
 import autoLoginRoute from "./users/me"
 import deactivateRoute from "./users/deactive"
 
-import listRoute from "./posts/list"
+import postListRoute from "./posts/list"
 import postinfoRoute from "./posts/postinfo"
 import postWriteRoute from "./posts/write"
 import postEditRoute from "./posts/edit"
 import postDeleteRoute from "./posts/delete"
+
+import commentListRoute from "./comments/list"
+import commentinfoRoute from "./comments/postinfo"
+import commentWriteRoute from "./comments/write"
+import commentEditRoute from "./comments/edit"
+import commentDeleteRoute from "./comments/delete"
 
 import validateToken from "./middlewares/validateToken"
 
@@ -51,8 +57,10 @@ startServer()
 
 app.use("/api/validate", validateToken)
 
-app.use("/api/posts/list", listRoute)
+app.use("/api/posts/list", postListRoute)
 app.use("/api/posts/postinfo", postinfoRoute)
+app.use("/api/comments/list", commentListRoute)
+app.use("/api/comments/postinfo", commentinfoRoute)
 
 app.use("/api/users/login", loginRoute)
 app.use("/api/users/register", registerRoute)
@@ -63,5 +71,8 @@ app.use("/api/users/me", autoLoginRoute)
 app.use("/api/posts/write", postWriteRoute)
 app.use("/api/posts/edit", postEditRoute)
 app.use("/api/posts/delete", postDeleteRoute)
+app.use("/api/comments/write", commentWriteRoute)
+app.use("/api/comments/edit", commentEditRoute)
+app.use("/api/comments/delete", commentDeleteRoute)
 
 export default app
