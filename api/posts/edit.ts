@@ -1,22 +1,3 @@
-// export async function postUpdateAPI(req, res) {
-//     const { boardName, title, content, id, registeredBy } = req.body
-
-//     const update =
-//         "UPDATE post SET board_id = ?, title = ?, content = ? WHERE id = ?"
-
-//     try {
-//         const result = await connection.query(update, [
-//             boardName,
-//             title,
-//             content,
-//             id,
-//         ])
-//         res.status(200).send()
-//     } catch (err) {
-//         res.status(500).send(err)
-//     }
-// }
-
 import express, { Request, Response } from "express"
 import { ApiResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
@@ -29,23 +10,24 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    if (res.locals.user.id !== req.body.user.id) {
+    if (res.locals.validatedUser.user.id !== req.body.user.id) {
         res.status(500).send("validate fail")
     }
 
     const postinfo = req.body.post
-    const registeredBy = res.locals.validatedUser
+    console.log(postinfo)
 
-    const edit = `UPDATE post SET (board_id, title, content, registered_by) 
-        VALUES (?, ?, ?, ?)`
+    const edit = `UPDATE post SET board_id = ?, title = ?, content = ? WHERE id = ?`
 
     try {
         const result = await connection.query(edit, [
             postinfo.boardId,
             postinfo.title,
             postinfo.content,
-            registeredBy,
+            postinfo.id,
         ])
+
+        console.log(result)
 
         res.status(200).json({
             code: "S",

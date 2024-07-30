@@ -38,9 +38,11 @@ router.post("/", async (req: Request, res: Response) => {
             } as ApiResponse)
         }
 
+        console.log(result[0].insertId)
         res.status(200).json({
             code: "S",
             message: "Successfully posted",
+            postId: result[0].insertId,
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)

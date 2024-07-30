@@ -36,7 +36,7 @@ router.get("/:id", async (req: Request, res: Response) => {
         res.status(200).json({
             code: "S",
             message: "Successfully get list of posts",
-            data: postinfo,
+            postinfo: postinfo[0],
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
