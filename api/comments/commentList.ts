@@ -16,27 +16,23 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     const postId = req.params.id
 
-    const getPostinfo = `SELECT 
-        post.*,
-        boardinfo.board_id AS boardinfo_board_id,
-        boardinfo.board_name
+    const getCommentList = `SELECT 
+        comment.*
     FROM 
-        post
-    LEFT JOIN 
-        boardinfo ON post.board_id = boardinfo.board_id
+        comment
     WHERE
-        post.id = ?`
+        post_id = ?`
 
     try {
-        const [postinfo] = await connection.query<RowDataPacket[]>(
-            getPostinfo,
+        const [commentList] = await connection.query<RowDataPacket[]>(
+            getCommentList,
             [postId]
         )
 
         res.status(200).json({
             code: "S",
-            message: "Successfully get list of posts",
-            postinfo: postinfo[0],
+            message: "Successfully get list of comments",
+            commentList: commentList,
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)

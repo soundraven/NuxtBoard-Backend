@@ -16,7 +16,7 @@ import postEditRoute from "./posts/edit"
 import postDeleteRoute from "./posts/delete"
 
 import commentListRoute from "./comments/list"
-import commentinfoRoute from "./comments/postinfo"
+import commentinfoRoute from "./comments/commentList"
 import commentWriteRoute from "./comments/write"
 import commentEditRoute from "./comments/edit"
 import commentDeleteRoute from "./comments/delete"
@@ -60,7 +60,7 @@ app.use("/api/validate", validateToken)
 app.use("/api/posts/list", postListRoute)
 app.use("/api/posts/postinfo", postinfoRoute)
 app.use("/api/comments/list", commentListRoute)
-app.use("/api/comments/postinfo", commentinfoRoute)
+app.use("/api/comments/commentList", commentinfoRoute)
 
 app.use("/api/users/login", loginRoute)
 app.use("/api/users/register", registerRoute)
