@@ -8,6 +8,7 @@ import loginRoute from "./users/login"
 import registerRoute from "./users/register"
 import autoLoginRoute from "./users/me"
 import deactivateRoute from "./users/deactive"
+import setUsernameRoute from "./users/setUsername"
 
 import postListRoute from "./posts/list"
 import postinfoRoute from "./posts/postinfo"
@@ -15,7 +16,7 @@ import postWriteRoute from "./posts/write"
 import postEditRoute from "./posts/edit"
 import postDeleteRoute from "./posts/delete"
 
-import commentListRoute from "./comments/list"
+import myCommentListRoute from "./comments/myCommentList"
 import commentinfoRoute from "./comments/commentList"
 import commentWriteRoute from "./comments/write"
 import commentEditRoute from "./comments/edit"
@@ -59,7 +60,7 @@ app.use("/api/validate", validateToken)
 
 app.use("/api/posts/list", postListRoute)
 app.use("/api/posts/postinfo", postinfoRoute)
-app.use("/api/comments/list", commentListRoute)
+app.use("/api/comments/myCommentList", myCommentListRoute)
 app.use("/api/comments/commentList", commentinfoRoute)
 
 app.use("/api/users/login", loginRoute)
@@ -68,6 +69,7 @@ app.use("/api/users/register", registerRoute)
 app.use(validateToken)
 app.use("/api/users/deactivate", deactivateRoute)
 app.use("/api/users/me", autoLoginRoute)
+app.use("/api/users/setUsername", setUsernameRoute)
 app.use("/api/posts/write", postWriteRoute)
 app.use("/api/posts/edit", postEditRoute)
 app.use("/api/posts/delete", postDeleteRoute)

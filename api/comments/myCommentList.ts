@@ -9,24 +9,24 @@ dotenv.config()
 
 const router = express.Router()
 
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:registeredBy", async (req: Request, res: Response) => {
     if (!connection) {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const postId = req.params.id
+    const registeredBy = req.params.registeredBy
 
-    let getCommentList = `SELECT 
+    const getCommentList = `SELECT 
         comment.*
     FROM 
         comment
     WHERE
-        post_id = ?`
+        registered_by = ?`
 
     try {
         const [commentList] = await connection.query<RowDataPacket[]>(
             getCommentList,
-            [postId]
+            [registeredBy]
         )
 
         res.status(200).json({
