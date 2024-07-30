@@ -11,6 +11,9 @@ import deactivateRoute from "./users/deactive"
 
 import listRoute from "./posts/list"
 import postinfoRoute from "./posts/postinfo"
+import postWriteRoute from "./posts/write"
+import postEditRoute from "./posts/edit"
+import postDeleteRoute from "./posts/delete"
 
 import validateToken from "./middlewares/validateToken"
 
@@ -57,5 +60,8 @@ app.use("/api/users/register", registerRoute)
 app.use(validateToken)
 app.use("/api/users/deactivate", deactivateRoute)
 app.use("/api/users/me", autoLoginRoute)
+app.use("/api/posts/write", postWriteRoute)
+app.use("/api/posts/edit", postEditRoute)
+app.use("/api/posts/delete", postDeleteRoute)
 
 export default app
