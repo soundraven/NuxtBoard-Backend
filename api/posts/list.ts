@@ -16,21 +16,27 @@ dotenv.config()
 const router = express.Router()
 
 router.get("/", async (req: Request, res: Response) => {
+    console.log("시작")
     if (!connection) {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const { currentPage, pageSize } = req.query as {
+    const { currentPage, pageSize, registeredBy } = req.query as {
         currentPage: string
         pageSize: string
+        registeredBy: string
     }
+
+    console.log(registeredBy)
+    console.log(req.query.registeredBy)
 
     const currentPageNum = parseInt(currentPage) - 1 //프론트에선 현재 페이지 1 기준 시작
     const pageSizeNum = parseInt(pageSize)
+    const registeredByNum = registeredBy ? parseInt(registeredBy) : null
 
     const listSize = currentPageNum * pageSizeNum
 
-    const getPostList = `SELECT 
+    let getPostList = `SELECT 
         post.*,
         boardinfo.board_id AS boardinfo_board_id,
         boardinfo.board_name
@@ -38,22 +44,44 @@ router.get("/", async (req: Request, res: Response) => {
         post
     LEFT JOIN 
         boardinfo ON post.board_id = boardinfo.board_id
-    ORDER BY
-        post.id DESC
-    LIMIT ?,?`
+    `
 
-    const getCount = `
+    let getCount = `
         SELECT COUNT(*) as totalPosts
         FROM post
     `
 
+    if (registeredByNum !== null && !isNaN(registeredByNum)) {
+        getPostList += ` WHERE post.registered_by = ? `
+        getCount += ` WHERE post.registered_by = ? `
+    }
+
+    getPostList += `
+    ORDER BY
+        post.id DESC
+    LIMIT ?,?`
+
     try {
+        console.log("test1")
+        const postListParams =
+            registeredByNum !== null && !isNaN(registeredByNum)
+                ? [registeredByNum, listSize, pageSizeNum]
+                : [listSize, pageSizeNum]
+
+        const countParams =
+            registeredByNum !== null && !isNaN(registeredByNum)
+                ? [registeredByNum]
+                : []
+
         const [postListResult] = await connection.execute<RowDataPacket[]>(
             getPostList,
-            [listSize, pageSizeNum]
+            postListParams
         )
 
-        const [countResult] = await connection.query<RowDataPacket[]>(getCount)
+        const [countResult] = await connection.query<RowDataPacket[]>(
+            getCount,
+            countParams
+        )
 
         const postList = postListResult as Postinfo[]
 
