@@ -8,7 +8,7 @@ const selectToken = `SELECT *
         FROM user_auths
         WHERE token = ? AND expires > NOW()`
 
-const selectUser = `SELECT id, email, username, registered_date
+const selectUser = `SELECT id, email, username, registered_date, active
         FROM userinfo 
         WHERE id = ?`
 
@@ -59,6 +59,14 @@ export default async function validateToken(
                 code: "F",
                 errorCode: "005",
                 message: "Userinfo not exist",
+            } as ApiResponse)
+        }
+
+        if (user[0].active === 0) {
+            return res.status(500).json({
+                code: "F",
+                errorCode: "006",
+                message: "Already resigned user",
             } as ApiResponse)
         }
 

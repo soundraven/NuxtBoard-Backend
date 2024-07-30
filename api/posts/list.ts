@@ -16,7 +16,6 @@ dotenv.config()
 const router = express.Router()
 
 router.get("/", async (req: Request, res: Response) => {
-    console.log("시작")
     if (!connection) {
         return errorHandler(res, new Error("Database connection not available"))
     }
@@ -26,9 +25,6 @@ router.get("/", async (req: Request, res: Response) => {
         pageSize: string
         registeredBy: string
     }
-
-    console.log(registeredBy)
-    console.log(req.query.registeredBy)
 
     const currentPageNum = parseInt(currentPage) - 1 //프론트에선 현재 페이지 1 기준 시작
     const pageSizeNum = parseInt(pageSize)
@@ -62,7 +58,6 @@ router.get("/", async (req: Request, res: Response) => {
     LIMIT ?,?`
 
     try {
-        console.log("test1")
         const postListParams =
             registeredByNum !== null && !isNaN(registeredByNum)
                 ? [registeredByNum, listSize, pageSizeNum]

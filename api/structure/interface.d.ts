@@ -13,6 +13,7 @@ interface Userinfo {
     password: string
     id?: number
     username?: string
+    active?: number
 }
 
 interface CountResult {

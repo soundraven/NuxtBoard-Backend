@@ -31,7 +31,7 @@ router.post("/", async (req: Request, res: Response) => {
 
     const selectEmail = `SELECT COUNT(*) as count FROM userinfo WHERE email = ?`
     const selectUserinfo = `SELECT email, password FROM userinfo WHERE email = ?`
-    const getUser = `SELECT email, id, username FROM userinfo WHERE email = ?`
+    const getUser = `SELECT email, id, username, active FROM userinfo WHERE email = ?`
     const insertToken = `INSERT INTO user_auths (token, registered_by, expires) VALUES (?, ?, FROM_UNIXTIME(?))`
 
     try {
@@ -59,6 +59,14 @@ router.post("/", async (req: Request, res: Response) => {
                 getUser,
                 [userinfo.email]
             )
+
+            if (user[0].active === 0) {
+                return res.status(500).json({
+                    code: "F",
+                    errorCode: "006",
+                    message: "Already resigned user",
+                } as ApiResponse)
+            }
 
             let token =
                 userinfo.email +
