@@ -16,8 +16,13 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     if (res.locals.validatedUser.user.id !== req.body.user.id) {
-        res.status(500).send("validate fail")
+        return res.status(200).json({
+            code: "E",
+            errorCode: "006",
+            message: "Validation failed.",
+        } as ApiResponse)
     }
+
     const user = req.body.user
     const username = req.body.username
 

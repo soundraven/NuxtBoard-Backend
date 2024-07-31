@@ -12,7 +12,11 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     if (res.locals.validatedUser.user.id !== req.body.user.id) {
-        res.status(500).send("validate fail")
+        res.status(200).json({
+            code: "E",
+            errorCode: "006",
+            message: "validation failed",
+        })
     }
 
     const postinfo = req.body.post
@@ -30,10 +34,9 @@ router.post("/", async (req: Request, res: Response) => {
             registeredBy,
         ])
 
-        console.log(result)
         if (result[0].affectedRows < 1) {
-            return res.status(500).json({
-                code: "F",
+            return res.status(200).json({
+                code: "E",
                 message: "Failed to post",
             } as ApiResponse)
         }

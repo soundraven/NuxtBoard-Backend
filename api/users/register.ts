@@ -16,7 +16,7 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     if (!req.body.user.email || !req.body.user.password) {
-        return res.status(400).json({
+        return res.status(200).json({
             code: "E",
             errorCode: "001",
             message: "userinfo not exist",
@@ -41,7 +41,7 @@ router.post("/", async (req: Request, res: Response) => {
         >(duplicateCheck, [userinfo.email])
 
         if (result[0].count > 0) {
-            return res.status(401).json({
+            return res.status(200).json({
                 code: "E",
                 errorCode: "002",
                 message: "Email already exist.",

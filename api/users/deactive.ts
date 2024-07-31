@@ -15,7 +15,7 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     if (!req.body || !req.body.user.id) {
-        return res.status(400).json({
+        return res.status(200).json({
             code: "E",
             errorCode: "001",
             message: "userinfo not exist",
@@ -39,7 +39,7 @@ router.post("/", async (req: Request, res: Response) => {
             user.id !== validatedUser.user.id ||
             token !== validatedUser.token
         ) {
-            return res.status(401).json({
+            return res.status(200).json({
                 code: "E",
                 message: "User auth not matched",
             } as ApiResponse)
@@ -51,8 +51,8 @@ router.post("/", async (req: Request, res: Response) => {
         )
 
         if (deactivate.affectedRows === 0) {
-            return res.status(401).json({
-                code: "F",
+            return res.status(200).json({
+                code: "E",
                 message: "User not found",
             } as ApiResponse)
         }

@@ -3,7 +3,7 @@ import { ApiResponse } from "../structure/interface"
 const router = express.Router()
 
 router.get("/", async (req: Request, res: Response) => {
-    res.json({
+    res.status(200).json({
         code: "S",
         message: "User authenticated",
         user: res.locals.validatedUser.user,

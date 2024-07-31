@@ -26,7 +26,7 @@ export default async function validateToken(
     const token = req.headers["authorization"]?.split(" ")[1] || ""
 
     if (token === "") {
-        res.status(401).json({
+        res.status(200).json({
             code: "F",
             message: "Auth failed",
         } as ApiResponse)
@@ -40,7 +40,7 @@ export default async function validateToken(
         )
 
         if (validate.length <= 0) {
-            return res.status(401).json({
+            return res.status(200).json({
                 code: "F",
                 errorCode: "004",
                 message: "Auth expired or not exists",
@@ -55,7 +55,7 @@ export default async function validateToken(
         )
 
         if (user.length <= 0) {
-            return res.status(500).json({
+            return res.status(200).json({
                 code: "F",
                 errorCode: "005",
                 message: "Userinfo not exist",
@@ -63,7 +63,7 @@ export default async function validateToken(
         }
 
         if (user[0].active === 0) {
-            return res.status(500).json({
+            return res.status(200).json({
                 code: "F",
                 errorCode: "006",
                 message: "Already resigned user",

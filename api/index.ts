@@ -60,7 +60,7 @@ app.use("/api/validate", validateToken)
 
 app.use("/api/posts/list", postListRoute)
 app.use("/api/posts/postinfo", postinfoRoute)
-app.use("/api/comments/myCommentList", myCommentListRoute)
+
 app.use("/api/comments/commentList", commentinfoRoute)
 
 app.use("/api/users/login", loginRoute)
@@ -76,5 +76,6 @@ app.use("/api/posts/delete", postDeleteRoute)
 app.use("/api/comments/write", commentWriteRoute)
 app.use("/api/comments/edit", commentEditRoute)
 app.use("/api/comments/delete", commentDeleteRoute)
+app.use("/api/comments/myCommentList", myCommentListRoute)
 
 export default app

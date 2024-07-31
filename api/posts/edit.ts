@@ -11,11 +11,14 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     if (res.locals.validatedUser.user.id !== req.body.user.id) {
-        res.status(500).send("validate fail")
+        return res.status(200).json({
+            code: "E",
+            errorCode: "006",
+            message: "Validation failed.",
+        } as ApiResponse)
     }
 
     const postinfo = req.body.post
-    console.log(postinfo)
 
     const edit = `UPDATE post SET board_id = ?, title = ?, content = ? WHERE id = ?`
 
@@ -26,8 +29,6 @@ router.post("/", async (req: Request, res: Response) => {
             postinfo.content,
             postinfo.id,
         ])
-
-        console.log(result)
 
         res.status(200).json({
             code: "S",

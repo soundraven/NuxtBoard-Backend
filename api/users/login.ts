@@ -16,7 +16,7 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     if (!req.body.user.email || !req.body.user.password) {
-        return res.status(400).json({
+        return res.status(200).json({
             code: "E",
             errorCode: "001",
             message: "userinfo not exist",
@@ -40,7 +40,7 @@ router.post("/", async (req: Request, res: Response) => {
         >(selectEmail, [userinfo.email])
 
         if (countResult[0].count === 0) {
-            return res.status(401).json({
+            return res.status(200).json({
                 code: "E",
                 errorCode: "003",
                 message: "Email not exist.",
@@ -59,10 +59,10 @@ router.post("/", async (req: Request, res: Response) => {
                 getUser,
                 [userinfo.email]
             )
-
+            console.log(user[0].active)
             if (user[0].active === 0) {
-                return res.status(500).json({
-                    code: "F",
+                return res.status(200).json({
+                    code: "E",
                     errorCode: "006",
                     message: "Already resigned user",
                 } as ApiResponse)
@@ -75,8 +75,8 @@ router.post("/", async (req: Request, res: Response) => {
 
             token = crypto.createHash("sha256").update(token).digest("hex")
 
-            const expires =
-                Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24 * 7
+            const expires: number =
+                Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24
 
             await connection.query(insertToken, [token, user[0].id, expires])
 
@@ -87,7 +87,7 @@ router.post("/", async (req: Request, res: Response) => {
                 token: token,
             } as ApiResponse)
         } else {
-            res.status(401).json({
+            res.status(200).json({
                 code: "E",
                 errorCode: "004",
                 message: "Incorrect email or password.",
