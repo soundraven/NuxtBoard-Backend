@@ -59,7 +59,7 @@ router.post("/", async (req: Request, res: Response) => {
                 getUser,
                 [userinfo.email]
             )
-            console.log(user[0].active)
+
             if (user[0].active === 0) {
                 return res.status(200).json({
                     code: "E",

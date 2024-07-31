@@ -33,6 +33,8 @@ export default async function validateToken(
         return
     }
 
+    console.log("middlewares2")
+
     try {
         const [validate] = await connection.query<RowDataPacket[]>(
             selectToken,

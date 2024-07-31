@@ -17,17 +17,22 @@ router.get("/:id", async (req: Request, res: Response) => {
     const postId = req.params.id
 
     let getCommentList = `SELECT 
-        comment.*
+        comment.*,
+        userinfo.username
     FROM 
         comment
+    LEFT JOIN 
+        userinfo ON comment.registered_by = userinfo.id
     WHERE
-        post_id = ? AND active = 1`
+        post_id = ? AND comment.active = 1`
 
     try {
         const [commentList] = await connection.query<RowDataPacket[]>(
             getCommentList,
             [postId]
         )
+
+        console.log(commentList)
 
         res.status(200).json({
             code: "S",

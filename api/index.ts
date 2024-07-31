@@ -9,6 +9,7 @@ import registerRoute from "./users/register"
 import autoLoginRoute from "./users/me"
 import deactivateRoute from "./users/deactive"
 import setUsernameRoute from "./users/setUsername"
+import createTokenRoute from "./users/createToken"
 
 import postListRoute from "./posts/list"
 import postinfoRoute from "./posts/postinfo"
@@ -55,9 +56,6 @@ async function startServer() {
 }
 
 startServer()
-
-app.use("/api/validate", validateToken)
-
 app.use("/api/posts/list", postListRoute)
 app.use("/api/posts/postinfo", postinfoRoute)
 
@@ -65,6 +63,7 @@ app.use("/api/comments/commentList", commentinfoRoute)
 
 app.use("/api/users/login", loginRoute)
 app.use("/api/users/register", registerRoute)
+app.use("/api/users/createToken", createTokenRoute)
 
 app.use(validateToken)
 app.use("/api/users/deactivate", deactivateRoute)

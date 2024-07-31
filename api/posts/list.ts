@@ -51,8 +51,8 @@ router.get("/", async (req: Request, res: Response) => {
     `
 
     if (registeredByNum !== null && !isNaN(registeredByNum)) {
-        getPostList += ` AND WHERE post.registered_by = ? `
-        getCount += ` AND WHERE post.registered_by = ? `
+        getPostList += ` AND post.registered_by = ? `
+        getCount += ` AND post.registered_by = ? `
     }
 
     getPostList += `
