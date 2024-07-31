@@ -27,7 +27,7 @@ router.post("/", async (req: Request, res: Response) => {
 
         res.status(200).json({
             code: "S",
-            message: "Successfully edited",
+            message: "Post successfully edited",
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)

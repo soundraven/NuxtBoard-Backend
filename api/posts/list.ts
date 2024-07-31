@@ -40,16 +40,19 @@ router.get("/", async (req: Request, res: Response) => {
         post
     LEFT JOIN 
         boardinfo ON post.board_id = boardinfo.board_id
+    WHERE 
+        post.active = 1
     `
 
     let getCount = `
         SELECT COUNT(*) as totalPosts
         FROM post
+        WHERE post.active = 1
     `
 
     if (registeredByNum !== null && !isNaN(registeredByNum)) {
-        getPostList += ` WHERE post.registered_by = ? `
-        getCount += ` WHERE post.registered_by = ? `
+        getPostList += ` AND WHERE post.registered_by = ? `
+        getCount += ` AND WHERE post.registered_by = ? `
     }
 
     getPostList += `

@@ -21,7 +21,7 @@ router.get("/:id", async (req: Request, res: Response) => {
     FROM 
         comment
     WHERE
-        post_id = ?`
+        post_id = ? AND active = 1`
 
     try {
         const [commentList] = await connection.query<RowDataPacket[]>(

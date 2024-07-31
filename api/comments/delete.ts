@@ -1,18 +1,37 @@
-// export async function postDeleteAPI(req, res) {
-//     const id = req.body.id
-//     const deletePost = "UPDATE post SET active = 0 WHERE id = ?"
-//     try {
-//         const result = await connection.query(deletePost, [id])
-//         res.status(200).send()
-//     } catch (err) {
-//         res.status(500).send(err)
-//     }
-// }
-
 import express, { Request, Response } from "express"
 import { ApiResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 
 const router = express.Router()
+
+router.post("/", async (req: Request, res: Response) => {
+    if (!connection) {
+        return errorHandler(res, new Error("Database connection not available"))
+    }
+
+    if (res.locals.validatedUser.user.id !== req.body.user.id) {
+        return res.status(200).json({
+            code: "E",
+            errorCode: "006",
+            message: "Validation failed.",
+        } as ApiResponse)
+    }
+
+    const commentId = req.body.commentId
+
+    const deleteComment = `UPDATE comment SET active = 0 WHERE id = ?`
+
+    try {
+        const result = await connection.execute(deleteComment, [commentId])
+
+        res.status(200).json({
+            code: "S",
+            message: "Comment successfully deleted",
+        } as ApiResponse)
+    } catch (error) {
+        errorHandler(res, error)
+    }
+})
+
 export default router
