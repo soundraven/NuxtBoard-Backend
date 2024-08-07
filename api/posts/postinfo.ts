@@ -27,16 +27,24 @@ router.get("/:id", async (req: Request, res: Response) => {
     WHERE
         post.id = ?`
 
+    const getLikeinfo = `SELECT 
+        SUM(liked) AS total_likes, SUM(disliked) AS total_dislikes
+    FROM 
+        likeinfo 
+    WHERE 
+        post_id = ?`
+
     try {
-        const [postinfo] = await connection.query<RowDataPacket[]>(
-            getPostinfo,
-            [postId]
-        )
+        const [postinfo, likeinfo] = await Promise.all([
+            connection.query<RowDataPacket[]>(getPostinfo, [postId]),
+            connection.query<RowDataPacket[]>(getLikeinfo, [postId]),
+        ])
 
         res.status(200).json({
             code: "S",
             message: "Successfully get list of posts",
-            postinfo: postinfo[0],
+            postinfo: postinfo[0][0],
+            likeinfo: likeinfo[0][0],
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
