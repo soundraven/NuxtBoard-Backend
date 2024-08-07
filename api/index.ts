@@ -17,6 +17,7 @@ import postWriteRoute from "./posts/write"
 import postEditRoute from "./posts/edit"
 import postDeleteRoute from "./posts/delete"
 import likesRoute from "./posts/likes"
+import reportRoute from "./posts/report"
 
 import myCommentListRoute from "./comments/myCommentList"
 import commentinfoRoute from "./comments/commentList"
@@ -74,6 +75,7 @@ app.use("/api/posts/write", postWriteRoute)
 app.use("/api/posts/edit", postEditRoute)
 app.use("/api/posts/delete", postDeleteRoute)
 app.use("/api/posts/likes", likesRoute)
+app.use("/api/posts/report", reportRoute)
 app.use("/api/comments/write", commentWriteRoute)
 app.use("/api/comments/edit", commentEditRoute)
 app.use("/api/comments/delete", commentDeleteRoute)

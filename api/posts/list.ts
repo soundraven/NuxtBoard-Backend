@@ -1,15 +1,10 @@
 import express, { Request, Response } from "express"
-import {
-    ApiResponse,
-    GroupedPost,
-    Postinfo,
-    CountResult,
-} from "../structure/interface"
+import { ApiResponse, Postinfo } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
-import dayjs, { Dayjs } from "dayjs"
+import dayjs from "dayjs"
 
 dotenv.config()
 
@@ -26,22 +21,23 @@ router.get("/", async (req: Request, res: Response) => {
         registeredBy: string
     }
 
-    const currentPageNum = parseInt(currentPage) - 1 //프론트에선 현재 페이지 1 기준 시작
+    const currentPageNum = parseInt(currentPage) - 1 // 프론트에서 현재 페이지 1 기준 시작
     const pageSizeNum = parseInt(pageSize)
     const registeredByNum = registeredBy ? parseInt(registeredBy) : null
 
     const listSize = currentPageNum * pageSizeNum
 
-    let getPostList = `SELECT 
-        post.*,
-        boardinfo.board_id AS boardinfo_board_id,
-        boardinfo.board_name
-    FROM 
-        post
-    LEFT JOIN 
-        boardinfo ON post.board_id = boardinfo.board_id
-    WHERE 
-        post.active = 1
+    let getPostList = `
+        SELECT 
+            post.*,
+            boardinfo.board_id AS boardinfo_board_id,
+            boardinfo.board_name
+        FROM 
+            post
+        LEFT JOIN 
+            boardinfo ON post.board_id = boardinfo.board_id
+        WHERE 
+            post.active = 1
     `
 
     let getCount = `
@@ -50,68 +46,53 @@ router.get("/", async (req: Request, res: Response) => {
         WHERE post.active = 1
     `
 
+    const params: any[] = []
+
     if (registeredByNum !== null && !isNaN(registeredByNum)) {
         getPostList += ` AND post.registered_by = ? `
         getCount += ` AND post.registered_by = ? `
+        params.push(registeredByNum)
     }
 
     getPostList += `
-    ORDER BY
-        post.id DESC
-    LIMIT ?,?`
+        ORDER BY
+            post.id DESC
+        LIMIT ?,?`
+
+    params.push(listSize, pageSizeNum)
 
     try {
-        const postListParams =
-            registeredByNum !== null && !isNaN(registeredByNum)
-                ? [registeredByNum, listSize, pageSizeNum]
-                : [listSize, pageSizeNum]
-
-        const countParams =
-            registeredByNum !== null && !isNaN(registeredByNum)
-                ? [registeredByNum]
-                : []
-
-        const [postListResult] = await connection.execute<RowDataPacket[]>(
+        const [postListResult] = await connection.query<RowDataPacket[]>(
             getPostList,
-            postListParams
+            params
         )
-
         const [countResult] = await connection.query<RowDataPacket[]>(
             getCount,
-            countParams
+            [registeredByNum].filter(Boolean)
         )
 
         const postList = postListResult as Postinfo[]
 
-        const groupedPost: GroupedPost = postList.reduce(
-            (acc: GroupedPost, post: Postinfo) => {
-                const key: number = post.board_id
-                if (!acc[key]) {
-                    acc[key] = []
-                }
+        const groupedPost = postList.reduce((acc, post) => {
+            const key = post.board_id
+            if (!acc[key]) {
+                acc[key] = []
+            }
+            acc[key].push(post)
+            return acc
+        }, {} as Record<number, Postinfo[]>)
 
-                acc[key].push(post)
-                return acc
-            },
-            {}
-        )
-
-        Object.keys(groupedPost).forEach((key: string) => {
+        Object.keys(groupedPost).forEach((key) => {
             const numberKey = Number(key)
-
-            groupedPost[numberKey] = groupedPost[numberKey].map(
-                (item: Postinfo) => {
-                    return {
-                        ...item,
-                        formatted_date: dayjs(item.registered_date).format(
-                            "YYYY-MM-DD HH:mm:ss"
-                        ),
-                    }
-                }
-            )
+            groupedPost[numberKey] = groupedPost[numberKey].map((item) => ({
+                ...item,
+                formatted_date: dayjs(item.registered_date).format(
+                    "YYYY-MM-DD HH:mm:ss"
+                ),
+            }))
         })
 
-        const totalCount: number = countResult[0].totalPosts
+        const totalCount = countResult[0].totalPosts
 
         res.status(200).json({
             code: "S",

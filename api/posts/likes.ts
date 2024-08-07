@@ -36,6 +36,13 @@ router.post("/like", async (req: Request, res: Response) => {
         console.log(likedHistory)
 
         if (likedHistory.length > 0) {
+            if (likedHistory[0].liked === 1) {
+                return res.status(200).json({
+                    code: "E",
+                    message: "Already liked",
+                } as ApiResponse)
+            }
+
             await connection.execute(updateLiked, [
                 1,
                 likedHistory[0].disliked,
@@ -85,6 +92,13 @@ router.post("/dislike", async (req: Request, res: Response) => {
         console.log(likedHistory)
 
         if (likedHistory.length > 0) {
+            if (likedHistory[0].disliked === 1) {
+                return res.status(200).json({
+                    code: "E",
+                    message: "Already disliked",
+                } as ApiResponse)
+            }
+
             await connection.execute(updateDisliked, [
                 likedHistory[0].liked,
                 1,
