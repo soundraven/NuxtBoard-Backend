@@ -16,7 +16,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     const postId = req.params.id
 
-    let getCommentList = `SELECT 
+    const getCommentList = `SELECT 
         comment.*,
         userinfo.username
     FROM 
@@ -26,7 +26,7 @@ router.get("/:id", async (req: Request, res: Response) => {
     WHERE
         post_id = ? AND comment.active = 1`
 
-    let getReplyList = `SELECT 
+    const getReplyList = `SELECT 
         reply.*,
         userinfo.username
     FROM 
@@ -34,23 +34,33 @@ router.get("/:id", async (req: Request, res: Response) => {
     LEFT JOIN 
         userinfo ON reply.registered_by = userinfo.id
     WHERE
-        comment_id = ? AND reply.active = 1`
+        post_id = ? AND reply.active = 1`
 
     try {
-        const [commentList] = await connection.query<RowDataPacket[]>(
-            getCommentList,
-            [postId]
-        )
+        const [commentListResult, replyListResult] = await Promise.all([
+            connection.query<RowDataPacket[]>(getCommentList, [postId]),
+            connection.query<RowDataPacket[]>(getReplyList, [postId]),
+        ])
 
-        // console.log(commentList)
+        const commentList = commentListResult[0]
+        const replyList = replyListResult[0]
+
+        console.log(commentList, replyList)
+
+        const mappedCommentList = commentList.map((comment) => ({
+            ...comment,
+            replies: replyList.filter(
+                (reply) => reply.comment_id === comment.id
+            ),
+        }))
 
         res.status(200).json({
             code: "S",
             message: "Successfully get list of comments",
-            commentList: commentList,
+            commentList: mappedCommentList,
         } as ApiResponse)
     } catch (error) {
-        errorHandler(res, error)
+        return errorHandler(res, error)
     }
 })
 

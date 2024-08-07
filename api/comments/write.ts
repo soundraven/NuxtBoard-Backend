@@ -29,14 +29,14 @@ router.post("/", async (req: Request, res: Response) => {
         VALUES (?, ?, ?)`
 
     const writeReply = `INSERT INTO 
-        reply (comment_id, content, registered_by) 
-        VALUES (?, ?, ?)`
+        reply (post_id, comment_id, content, registered_by) 
+        VALUES (?, ?, ?, ?)`
 
     if (commentId) {
         try {
             const result = await connection.execute<ResultSetHeader>(
                 writeReply,
-                [commentId, reply, registeredBy]
+                [postId, commentId, reply, registeredBy]
             )
 
             if (result[0].affectedRows < 1) {
