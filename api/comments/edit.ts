@@ -14,18 +14,13 @@ router.post("/", async (req: Request, res: Response) => {
         res.status(500).send("validate fail")
     }
 
-    const postinfo = req.body.post
-    console.log(postinfo)
+    const comment = req.body.comment
+    const commentId = req.body.commentId
 
-    const edit = `UPDATE post SET board_id = ?, title = ?, content = ? WHERE id = ?`
+    const edit = `UPDATE comment SET content = ? WHERE id = ?`
 
     try {
-        const result = await connection.query(edit, [
-            postinfo.boardId,
-            postinfo.title,
-            postinfo.content,
-            postinfo.id,
-        ])
+        const result = await connection.execute(edit, [comment, commentId])
 
         console.log(result)
 
