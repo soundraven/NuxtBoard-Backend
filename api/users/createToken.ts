@@ -29,29 +29,56 @@ router.post("/", async (req: Request, res: Response) => {
             [user.id]
         )
 
-        if (dbuserinfo[0].id !== user.id) {
+        if (dbuserinfo.length === 0 || dbuserinfo[0].id !== user.id) {
             return res.status(200).json({
                 code: "E",
                 message: "User id not matched",
             })
         }
 
-        let token =
+        let refreshToken =
             user.email +
             Math.floor(Math.random() * 1000000).toString() +
             new Date().getTime().toString()
 
-        token = crypto.createHash("sha256").update(token).digest("hex")
+        let accessToken =
+            user.email +
+            Math.floor(Math.random() * 1000000).toString() +
+            new Date().getTime().toString()
 
-        const expires: number =
-            Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24
+        refreshToken = crypto
+            .createHash("sha256")
+            .update(refreshToken)
+            .digest("hex")
 
-        await connection.execute(insertToken, [token, user.id, expires])
+        accessToken = crypto
+            .createHash("sha256")
+            .update(accessToken)
+            .digest("hex")
+
+        const refreshExpires: number =
+            Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24 * 7
+
+        const accessTokenExpires: number =
+            Math.floor(new Date().getTime() / 1000) + 60 * 15
+
+        await connection.execute(insertToken, [
+            refreshToken,
+            user.id,
+            refreshExpires,
+        ])
+
+        await connection.execute(insertToken, [
+            accessToken,
+            user.id,
+            accessTokenExpires,
+        ])
 
         res.status(200).json({
             code: "S",
             message: "Successfully create new token",
-            token: token,
+            refreshToken: refreshToken,
+            accessToken: accessToken,
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
