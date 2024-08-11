@@ -18,7 +18,7 @@ router.post("/", async (req: Request, res: Response) => {
         return res.status(200).json({
             code: "E",
             errorCode: "001",
-            message: "userinfo not exist",
+            message: "UserInfo not exist",
         } as ApiResponse)
     }
 
@@ -30,7 +30,7 @@ router.post("/", async (req: Request, res: Response) => {
     const user = req.body.user
     const token = req.headers["authorization"]?.split(" ")[1] || ""
 
-    const deactivateQuery = ` UPDATE userinfo
+    const deactivateQuery = ` UPDATE user_info
         SET active = 0
         WHERE id = ?`
 

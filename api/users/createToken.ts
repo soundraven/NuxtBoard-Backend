@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express"
-import { Userinfo, ApiResponse } from "../structure/interface"
+import { UserInfo, ApiResponse } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
-import crypto from "crypto"
 import { RowDataPacket } from "mysql2"
+import { generateToken } from "../utils/generateToken"
 
 dotenv.config()
 
@@ -15,64 +15,46 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const selectUser = `SELECT id, email, username, registered_date, active
-        FROM userinfo 
-        WHERE id = ?`
-
-    const insertToken = `INSERT INTO user_auths (token, registered_by, expires) VALUES (?, ?, FROM_UNIXTIME(?))`
-
-    const user: Userinfo = req.body.user
+    const user: UserInfo = req.body.user
 
     try {
-        const [dbuserinfo] = await connection.execute<RowDataPacket[]>(
-            selectUser,
+        const [dbUserInfo] = await connection.execute<
+            UserInfo[] & RowDataPacket[]
+        >(
+            `SELECT id, email, username, registered_date, active
+            FROM user_info 
+            WHERE id = ?`,
             [user.id]
         )
 
-        if (dbuserinfo.length === 0 || dbuserinfo[0].id !== user.id) {
+        if (!dbUserInfo) {
+            return res.status(410).json({
+                code: "F",
+                message: "User not exist",
+            })
+        }
+
+        if (dbUserInfo[0].id !== user.id) {
             return res.status(200).json({
                 code: "E",
                 message: "User id not matched",
             })
         }
 
-        let refreshToken =
-            user.email +
-            Math.floor(Math.random() * 1000000).toString() +
-            new Date().getTime().toString()
-
-        let accessToken =
-            user.email +
-            Math.floor(Math.random() * 1000000).toString() +
-            new Date().getTime().toString()
-
-        refreshToken = crypto
-            .createHash("sha256")
-            .update(refreshToken)
-            .digest("hex")
-
-        accessToken = crypto
-            .createHash("sha256")
-            .update(accessToken)
-            .digest("hex")
-
-        const refreshExpires: number =
-            Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24 * 7
-
+        const refreshTokenExpires: number =
+            Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7
         const accessTokenExpires: number =
-            Math.floor(new Date().getTime() / 1000) + 60 * 15
+            Math.floor(Date.now() / 1000) + 60 * 15
 
-        await connection.execute(insertToken, [
-            refreshToken,
-            user.id,
-            refreshExpires,
+        const [refreshToken, accessToken] = await Promise.all([
+            generateToken(user, refreshTokenExpires, "refresh"),
+            generateToken(user, accessTokenExpires, "access"),
         ])
 
-        await connection.execute(insertToken, [
-            accessToken,
-            user.id,
-            accessTokenExpires,
-        ])
+        await connection.execute(
+            `INSERT INTO user_auth (token, registered_by, expires) VALUES (?, ?, FROM_UNIXTIME(?))`,
+            [refreshToken, user.id, refreshTokenExpires]
+        )
 
         res.status(200).json({
             code: "S",

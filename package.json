@@ -20,11 +20,13 @@
         "express": "^4.19.2",
         "google-auth-library": "^9.11.0",
         "googleapis": "^140.0.0",
+        "jsonwebtoken": "^9.0.2",
         "mysql2": "^3.10.1"
     },
     "devDependencies": {
         "@types/cors": "^2.8.17",
         "@types/express": "^4.17.21",
+        "@types/jsonwebtoken": "^9.0.6",
         "@types/node": "^20.14.9",
         "nodemon": "^3.1.4",
         "ts-node": "^10.9.2",

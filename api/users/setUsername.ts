@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { Userinfo, ApiResponse, CountResult } from "../structure/interface"
+import { UserInfo, ApiResponse, CountResult } from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
@@ -26,7 +26,7 @@ router.post("/", async (req: Request, res: Response) => {
     const user = req.body.user
     const username = req.body.username
 
-    const setUsername = `UPDATE userinfo SET username = ? WHERE id = ?`
+    const setUsername = `UPDATE user_info SET username = ? WHERE id = ?`
 
     try {
         const result = await connection.execute<RowDataPacket[]>(setUsername, [

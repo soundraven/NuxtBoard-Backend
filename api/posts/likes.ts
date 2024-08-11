@@ -23,9 +23,9 @@ router.post("/like", async (req: Request, res: Response) => {
     const postId = req.body.postId
     const userId = res.locals.validatedUser.user.id
 
-    const likedHistoryQuery = `SELECT liked, disliked FROM likeinfo WHERE post_id = ? AND registered_by = ?`
-    const updateLiked = `UPDATE likeinfo SET liked = ?, disliked = ? WHERE post_id = ? AND registered_by = ?`
-    const insertLiked = `INSERT INTO likeinfo (post_id, registered_by, liked) VALUES (?, ?, ?)`
+    const likedHistoryQuery = `SELECT liked, disliked FROM like_info WHERE post_id = ? AND registered_by = ?`
+    const updateLiked = `UPDATE like_info SET liked = ?, disliked = ? WHERE post_id = ? AND registered_by = ?`
+    const insertLiked = `INSERT INTO like_info (post_id, registered_by, liked) VALUES (?, ?, ?)`
 
     try {
         const [likedHistory] = await connection.query<RowDataPacket[]>(
@@ -79,9 +79,9 @@ router.post("/dislike", async (req: Request, res: Response) => {
     const postId = req.body.postId
     const userId = res.locals.validatedUser.user.id
 
-    const dislikedHistoryQuery = `SELECT liked, disliked FROM likeinfo WHERE post_id = ? AND registered_by = ?`
-    const updateDisliked = `UPDATE likeinfo SET liked = ?, disliked = ? WHERE post_id = ? AND registered_by = ?`
-    const insertDisliked = `INSERT INTO likeinfo (post_id, registered_by, disliked) VALUES (?, ?, ?)`
+    const dislikedHistoryQuery = `SELECT liked, disliked FROM like_info WHERE post_id = ? AND registered_by = ?`
+    const updateDisliked = `UPDATE like_info SET liked = ?, disliked = ? WHERE post_id = ? AND registered_by = ?`
+    const insertDisliked = `INSERT INTO like_info (post_id, registered_by, disliked) VALUES (?, ?, ?)`
 
     try {
         const [likedHistory] = await connection.query<RowDataPacket[]>(

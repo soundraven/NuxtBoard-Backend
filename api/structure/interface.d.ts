@@ -2,22 +2,18 @@ interface ApiResponse {
     code: "S" | "E" | "F"
     message: string
     errorCode?: string
-    user?: Userinfo
+    user?: UserInfo
     token?: string
     postList?: Postinfo[]
     totalCount?: number
 }
 
-interface Userinfo {
+interface UserInfo {
     email: string
     password: string
     id?: number
     username?: string
     active?: number
-}
-
-interface CountResult {
-    count: number
 }
 
 enum BoardId {
@@ -29,7 +25,7 @@ enum BoardId {
     후기 = 6,
 }
 
-interface Postinfo {
+interface PostInfo {
     id: number
     board_id: number
     registered_by: number
@@ -40,8 +36,8 @@ interface Postinfo {
 }
 
 interface GroupedPost {
-    [key: number]: Postinfo[]
+    [key: number]: PostInfo[]
 }
 
-export type { Userinfo, ApiResponse, CountResult, Postinfo, GroupedPost }
+export type { UserInfo, ApiResponse, CountResult, PostInfo, GroupedPost }
 export { BoardId }

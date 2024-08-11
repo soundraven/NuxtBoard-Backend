@@ -13,7 +13,6 @@ router.post("/", async (req: Request, res: Response) => {
     if (res.locals.validatedUser.user.id !== req.body.user.id) {
         return res.status(200).json({
             code: "E",
-            errorCode: "006",
             message: "Validation failed.",
         } as ApiResponse)
     }
@@ -23,7 +22,7 @@ router.post("/", async (req: Request, res: Response) => {
     const edit = `UPDATE post SET board_id = ?, title = ?, content = ? WHERE id = ?`
 
     try {
-        const result = await connection.query(edit, [
+        await connection.query(edit, [
             postinfo.boardId,
             postinfo.title,
             postinfo.content,

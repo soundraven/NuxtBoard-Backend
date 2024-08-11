@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { Userinfo, ApiResponse, CountResult } from "../structure/interface"
+import { UserInfo, ApiResponse, CountResult } from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
@@ -19,26 +19,26 @@ router.post("/", async (req: Request, res: Response) => {
         return res.status(200).json({
             code: "E",
             errorCode: "001",
-            message: "userinfo not exist",
+            message: "userInfo not exist",
         } as ApiResponse)
     }
 
-    const userinfo: Userinfo = req.body.user
+    const userInfo: UserInfo = req.body.user
     const encryptedPassword: string = crypto
         .createHash("sha256")
-        .update(userinfo.password + process.env.PWSALT)
+        .update(userInfo.password + process.env.PWSALT)
         .digest("hex")
 
     const duplicateCheck = `SELECT COUNT(email) AS count
-        FROM userinfo
+        FROM user_info
         WHERE email = ?`
 
-    const regist = `INSERT INTO userinfo (email, password, username) VALUES (?, ?, ?)`
+    const regist = `INSERT INTO user_info (email, password, username) VALUES (?, ?, ?)`
 
     try {
         const [result] = await connection.query<
             CountResult[] & RowDataPacket[]
-        >(duplicateCheck, [userinfo.email])
+        >(duplicateCheck, [userInfo.email])
 
         if (result[0].count > 0) {
             return res.status(200).json({
@@ -49,9 +49,9 @@ router.post("/", async (req: Request, res: Response) => {
         }
 
         await connection.query(regist, [
-            userinfo.email,
+            userInfo.email,
             encryptedPassword,
-            userinfo.username,
+            userInfo.username,
         ])
 
         res.status(200).json({

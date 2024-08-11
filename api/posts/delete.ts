@@ -23,7 +23,7 @@ router.post("/", async (req: Request, res: Response) => {
     const deletePost = `UPDATE post SET active = 0 WHERE id = ?`
 
     try {
-        const result = await connection.execute(deletePost, [postId])
+        await connection.execute(deletePost, [postId])
 
         res.status(200).json({
             code: "S",

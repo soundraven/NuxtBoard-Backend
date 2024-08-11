@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express"
-import { Userinfo, ApiResponse } from "../structure/interface"
+import { UserInfo, ApiResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
@@ -51,7 +51,7 @@ export default async function validateToken(
 
         const userId = validate[0].registered_by
 
-        const [user] = await connection.query<Userinfo[] & RowDataPacket[]>(
+        const [user] = await connection.query<UserInfo[] & RowDataPacket[]>(
             selectUser,
             [userId]
         )
@@ -60,7 +60,7 @@ export default async function validateToken(
             return res.status(200).json({
                 code: "F",
                 errorCode: "005",
-                message: "Userinfo not exist",
+                message: "UserInfo not exist",
             } as ApiResponse)
         }
 

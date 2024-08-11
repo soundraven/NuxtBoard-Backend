@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { ApiResponse, Postinfo } from "../structure/interface"
+import { ApiResponse, PostInfo } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -30,12 +30,12 @@ router.get("/", async (req: Request, res: Response) => {
     let getPostList = `
         SELECT 
             post.*,
-            boardinfo.board_id AS boardinfo_board_id,
-            boardinfo.board_name
+            board_info.board_id AS board_info_board_id,
+            board_info.board_name
         FROM 
             post
         LEFT JOIN 
-            boardinfo ON post.board_id = boardinfo.board_id
+            board_info ON post.board_id = board_info.board_id
         WHERE 
             post.active = 1
     `
@@ -71,7 +71,7 @@ router.get("/", async (req: Request, res: Response) => {
             [registeredByNum].filter(Boolean)
         )
 
-        const postList = postListResult as Postinfo[]
+        const postList = postListResult as PostInfo[]
 
         const groupedPost = postList.reduce((acc, post) => {
             const key = post.board_id
@@ -80,7 +80,7 @@ router.get("/", async (req: Request, res: Response) => {
             }
             acc[key].push(post)
             return acc
-        }, {} as Record<number, Postinfo[]>)
+        }, {} as Record<number, PostInfo[]>)
 
         Object.keys(groupedPost).forEach((key) => {
             const numberKey = Number(key)

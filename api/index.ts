@@ -40,8 +40,6 @@ app.listen(process.env.DB_PORT, () => {
     console.log(`open server ${process.env.DB_PORT}`)
 })
 
-export let connection: Connection | null = null
-
 async function startServer() {
     try {
         connection = await mysql.createConnection({
@@ -54,15 +52,17 @@ async function startServer() {
         console.log("DB Connection success")
     } catch (error) {
         console.error("DB Connection failed:", error)
+        process.exit(1)
     }
 }
 
+export let connection: Connection | null = null
+
 startServer()
+
 app.use("/api/posts/list", postListRoute)
 app.use("/api/posts/postinfo", postinfoRoute)
-
 app.use("/api/comments/commentList", commentinfoRoute)
-
 app.use("/api/users/login", loginRoute)
 app.use("/api/users/register", registerRoute)
 app.use("/api/users/createToken", createTokenRoute)

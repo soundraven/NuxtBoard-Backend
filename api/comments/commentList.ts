@@ -18,21 +18,21 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     const getCommentList = `SELECT 
         comment.*,
-        userinfo.username
+        user_info.username
     FROM 
         comment
     LEFT JOIN 
-        userinfo ON comment.registered_by = userinfo.id
+        user_info ON comment.registered_by = user_info.id
     WHERE
         post_id = ? AND comment.active = 1`
 
     const getReplyList = `SELECT 
         reply.*,
-        userinfo.username
+        user_info.username
     FROM 
         reply
     LEFT JOIN 
-        userinfo ON reply.registered_by = userinfo.id
+        user_info ON reply.registered_by = user_info.id
     WHERE
         post_id = ? AND reply.active = 1`
 
