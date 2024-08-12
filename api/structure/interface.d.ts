@@ -8,12 +8,21 @@ interface ApiResponse {
     totalCount?: number
 }
 
-interface UserInfo {
+interface NewUser {
     email: string
     password: string
+    username?: string
+}
+
+interface UserInfo {
+    email: string
     id?: number
     username?: string
     active?: number
+}
+
+interface LoginUserInfo extends UserInfo {
+    password: string
 }
 
 enum BoardId {
@@ -39,5 +48,12 @@ interface GroupedPost {
     [key: number]: PostInfo[]
 }
 
-export type { UserInfo, ApiResponse, CountResult, PostInfo, GroupedPost }
+export type {
+    UserInfo,
+    ApiResponse,
+    NewUser,
+    LoginUserInfo,
+    PostInfo,
+    GroupedPost,
+}
 export { BoardId }

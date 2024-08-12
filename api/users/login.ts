@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { UserInfo, ApiResponse } from "../structure/interface"
+import { UserInfo, ApiResponse, LoginUserInfo } from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
@@ -16,75 +16,77 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    if (!req.body.user.email || !req.body.user.password) {
+    const loginUser: LoginUserInfo = req.body.user
+
+    if (!loginUser.email || !loginUser.password) {
         return res.status(400).json({
             code: "F",
             message: "UserInfo not exist",
         } as ApiResponse)
     }
 
-    const userInfo: UserInfo = req.body.user
     const encryptedPassword: string = crypto
         .createHash("sha256")
-        .update(userInfo.password + process.env.PWSALT)
+        .update(loginUser.password + process.env.PWSALT)
         .digest("hex")
 
     try {
         const [dbUserInfo] = await connection.query<
-            UserInfo[] & RowDataPacket[]
+            LoginUserInfo[] & RowDataPacket[]
         >(
             `SELECT id, email, password, username, active FROM user_info WHERE email = ?`,
-            [userInfo.email]
+            [loginUser.email]
         )
 
         if (!dbUserInfo) {
-            return res.status(404).json({
+            return res.status(401).json({
                 code: "E",
                 message: "User not exist",
             } as ApiResponse)
         }
 
-        const user: UserInfo = dbUserInfo[0]
+        if (
+            loginUser.email !== dbUserInfo[0].email ||
+            encryptedPassword !== dbUserInfo[0].password
+        ) {
+            return res.status(401).json({
+                code: "E",
+                message: "Email or Password not matched",
+            } as ApiResponse)
+        }
 
-        if (user.active === 0) {
+        if (dbUserInfo[0].active === 0) {
             return res.status(410).json({
                 code: "E",
                 message: "Already resigned user",
             } as ApiResponse)
         }
 
-        if (
-            user.email === userInfo.email &&
-            user.password === encryptedPassword
-        ) {
-            const refreshTokenExpires: number =
-                Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7
-            const accessTokenExpires: number =
-                Math.floor(Date.now() / 1000) + 60 * 15
+        const { password, ...userWithoutPassword } = dbUserInfo[0]
+        const user: UserInfo = userWithoutPassword
 
-            const [refreshToken, accessToken] = await Promise.all([
-                generateToken(user, refreshTokenExpires, "refresh"),
-                generateToken(user, accessTokenExpires, "access"),
-            ])
+        const refreshTokenExpires: number =
+            Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7
+        const accessTokenExpires: number =
+            Math.floor(Date.now() / 1000) + 60 * 15
 
-            await connection.execute(
-                `INSERT INTO user_auth (token, registered_by, expires) VALUES (?, ?, FROM_UNIXTIME(?))`,
-                [refreshToken, user.id, refreshTokenExpires]
-            )
+        const [refreshToken, accessToken] = await Promise.all([
+            generateToken(user, refreshTokenExpires, "refresh"),
+            generateToken(user, accessTokenExpires, "access"),
+        ])
 
-            res.status(200).json({
-                code: "S",
-                message: "Login success",
-                user: user,
-                refreshToken: refreshToken,
-                accessToken: accessToken,
-            } as ApiResponse)
-        } else {
-            res.status(401).json({
-                code: "E",
-                message: "Incorrect email or password.",
-            })
-        }
+        await connection.execute(
+            `INSERT INTO user_auth (token, registered_by, expires) VALUES (?, ?, FROM_UNIXTIME(?))`,
+            [refreshToken, user.id, refreshTokenExpires]
+        )
+
+        res.status(200).json({
+            code: "S",
+            message: "Login success",
+            user: user,
+            refreshToken: refreshToken,
+            accessToken: accessToken,
+        } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
     }

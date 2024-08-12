@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { UserInfo, ApiResponse, CountResult } from "../structure/interface"
+import { UserInfo, ApiResponse } from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
@@ -36,9 +36,10 @@ router.post("/", async (req: Request, res: Response) => {
     const regist = `INSERT INTO user_info (email, password, username) VALUES (?, ?, ?)`
 
     try {
-        const [result] = await connection.query<
-            CountResult[] & RowDataPacket[]
-        >(duplicateCheck, [userInfo.email])
+        const [result] = await connection.query<RowDataPacket[]>(
+            duplicateCheck,
+            [userInfo.email]
+        )
 
         if (result[0].count > 0) {
             return res.status(200).json({
