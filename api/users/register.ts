@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { UserInfo, ApiResponse } from "../structure/interface"
+import { UserInfo, ApiResponse, NewUser } from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
@@ -15,45 +15,37 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    if (!req.body.user.email || !req.body.user.password) {
-        return res.status(200).json({
-            code: "E",
-            errorCode: "001",
-            message: "userInfo not exist",
+    const NewUser: NewUser = req.body.user
+
+    if (!NewUser.email || !NewUser.password) {
+        return res.status(400).json({
+            code: "F",
+            message: "UserInfo not exist",
         } as ApiResponse)
     }
 
-    const userInfo: UserInfo = req.body.user
     const encryptedPassword: string = crypto
         .createHash("sha256")
-        .update(userInfo.password + process.env.PWSALT)
+        .update(NewUser.password + process.env.PWSALT)
         .digest("hex")
-
-    const duplicateCheck = `SELECT COUNT(email) AS count
-        FROM user_info
-        WHERE email = ?`
-
-    const regist = `INSERT INTO user_info (email, password, username) VALUES (?, ?, ?)`
 
     try {
         const [result] = await connection.query<RowDataPacket[]>(
-            duplicateCheck,
-            [userInfo.email]
+            `SELECT COUNT(email) AS count FROM user_info WHERE email = ?`,
+            [NewUser.email]
         )
 
         if (result[0].count > 0) {
-            return res.status(200).json({
+            return res.status(409).json({
                 code: "E",
-                errorCode: "002",
                 message: "Email already exist.",
             } as ApiResponse)
         }
 
-        await connection.query(regist, [
-            userInfo.email,
-            encryptedPassword,
-            userInfo.username,
-        ])
+        await connection.query(
+            `INSERT INTO user_info (email, password, username) VALUES (?, ?, ?)`,
+            [NewUser.email, encryptedPassword, NewUser.username]
+        )
 
         res.status(200).json({
             code: "S",
