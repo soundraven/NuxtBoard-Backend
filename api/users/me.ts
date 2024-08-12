@@ -7,7 +7,7 @@ router.get("/", async (req: Request, res: Response) => {
         code: "S",
         message: "User authenticated",
         user: res.locals.validatedUser.user,
-        token: res.locals.validatedUser.token,
+        accessToken: res.locals.validatedUser.token,
     } as ApiResponse)
 })
 

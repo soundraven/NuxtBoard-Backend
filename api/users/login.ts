@@ -5,7 +5,11 @@ import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
-import { generateToken } from "../utils/generateToken"
+import {
+    accessTokenExpires,
+    generateToken,
+    refreshTokenExpires,
+} from "../utils/generateToken"
 
 dotenv.config()
 
@@ -31,10 +35,10 @@ router.post("/", async (req: Request, res: Response) => {
         .digest("hex")
 
     try {
-        const [dbUserInfo] = await connection.query<
+        const [dbUserInfo] = await connection.execute<
             LoginUserInfo[] & RowDataPacket[]
         >(
-            `SELECT id, email, password, username, active FROM user_info WHERE email = ?`,
+            `SELECT id, email, password, user_name, active FROM user_info WHERE email = ?`,
             [loginUser.email]
         )
 
@@ -64,11 +68,6 @@ router.post("/", async (req: Request, res: Response) => {
 
         const { password, ...userWithoutPassword } = dbUserInfo[0]
         const user: UserInfo = userWithoutPassword
-
-        const refreshTokenExpires: number =
-            Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7
-        const accessTokenExpires: number =
-            Math.floor(Date.now() / 1000) + 60 * 15
 
         const [refreshToken, accessToken] = await Promise.all([
             generateToken(user, refreshTokenExpires, "refresh"),

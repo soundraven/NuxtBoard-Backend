@@ -18,7 +18,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     const getCommentList = `SELECT 
         comment.*,
-        user_info.username
+        user_info.user_name
     FROM 
         comment
     LEFT JOIN 
@@ -28,7 +28,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     const getReplyList = `SELECT 
         reply.*,
-        user_info.username
+        user_info.user_name
     FROM 
         reply
     LEFT JOIN 

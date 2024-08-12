@@ -30,7 +30,7 @@ router.get("/", async (req: Request, res: Response) => {
     let getPostList = `
         SELECT 
             post.*,
-            board_info.board_id AS board_info_board_id,
+            board_info.board_id AS board_id,
             board_info.board_name
         FROM 
             post

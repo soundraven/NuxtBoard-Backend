@@ -9,10 +9,10 @@ import registerRoute from "./users/register"
 import autoLoginRoute from "./users/me"
 import deactivateRoute from "./users/deactive"
 import setUsernameRoute from "./users/setUsername"
-import createTokenRoute from "./users/createToken"
+import refreshAccessTokenRoute from "./users/refreshAccessToken"
 
 import postListRoute from "./posts/list"
-import postinfoRoute from "./posts/postinfo"
+import postInfoRoute from "./posts/postInfo"
 import postWriteRoute from "./posts/write"
 import postEditRoute from "./posts/edit"
 import postDeleteRoute from "./posts/delete"
@@ -61,11 +61,11 @@ export let connection: Connection | null = null
 startServer()
 
 app.use("/api/posts/list", postListRoute)
-app.use("/api/posts/postinfo", postinfoRoute)
+app.use("/api/posts/postInfo", postInfoRoute)
 app.use("/api/comments/commentList", commentinfoRoute)
 app.use("/api/users/login", loginRoute)
 app.use("/api/users/register", registerRoute)
-app.use("/api/users/createToken", createTokenRoute)
+app.use("/api/users/refreshAccessToken", refreshAccessTokenRoute)
 
 app.use(validateToken)
 app.use("/api/users/deactivate", deactivateRoute)

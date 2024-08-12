@@ -4,21 +4,21 @@ interface ApiResponse {
     errorCode?: string
     user?: UserInfo
     token?: string
-    postList?: Postinfo[]
+    postList?: PostInfo[]
     totalCount?: number
 }
 
 interface NewUser {
     email: string
     password: string
-    username?: string
+    userName?: string
 }
 
 interface UserInfo {
     email: string
-    id?: number
-    username?: string
-    active?: number
+    id: number
+    userName?: string
+    active: number
 }
 
 interface LoginUserInfo extends UserInfo {

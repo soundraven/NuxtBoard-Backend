@@ -12,10 +12,6 @@ const selectToken = `SELECT *
         FROM user_auths
         WHERE token = ? AND expires > NOW()`
 
-const selectUser = `SELECT id, email, username, registered_date, active
-        FROM userinfo 
-        WHERE id = ?`
-
 export default async function validateToken(
     req: Request,
     res: Response,
@@ -46,11 +42,9 @@ export default async function validateToken(
         const userId = decoded.id
 
         const [user] = await connection.query<UserInfo[] & RowDataPacket[]>(
-            `SELECT id, email, username, registered_date, active FROM user_info WHERE id = ?`,
+            `SELECT id, email, user_name, registered_date, active FROM user_info WHERE id = ?`,
             [userId]
         )
-
-        console.log(user)
 
         if (user.length < 1) {
             return res.status(404).json({

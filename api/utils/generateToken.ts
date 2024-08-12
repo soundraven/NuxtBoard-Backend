@@ -4,11 +4,11 @@ import dotenv from "dotenv"
 
 dotenv.config()
 
-export async function generateToken(
+export function generateToken(
     user: UserInfo,
     expiresInSeconds: number,
     tokenType: "access" | "refresh"
-): Promise<string> {
+): string {
     if (!process.env.JWT_SECRET) {
         throw new Error(
             "JWT secret key is not defined in the environment variables"
@@ -17,13 +17,20 @@ export async function generateToken(
 
     const payload = {
         id: user.id,
-        username: user.username,
+        userName: user.userName,
         type: tokenType,
     }
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    const token: string = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: expiresInSeconds,
     })
 
     return token
 }
+
+export async function checkRefreshToken(refreshToken: string) {}
+
+export const refreshTokenExpires: number =
+    Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7
+export const accessTokenExpires: number =
+    Math.floor(Date.now() / 1000) + 60 * 15

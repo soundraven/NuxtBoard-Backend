@@ -19,7 +19,7 @@ router.post("/", async (req: Request, res: Response) => {
         })
     }
 
-    const postinfo = req.body.post
+    const postInfo = req.body.post
     const registeredBy = res.locals.validatedUser.user.id
 
     const write = `INSERT INTO 
@@ -28,9 +28,9 @@ router.post("/", async (req: Request, res: Response) => {
 
     try {
         const result = await connection.execute<ResultSetHeader>(write, [
-            postinfo.boardId,
-            postinfo.title,
-            postinfo.content,
+            postInfo.boardId,
+            postInfo.title,
+            postInfo.content,
             registeredBy,
         ])
 

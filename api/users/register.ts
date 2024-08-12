@@ -43,8 +43,8 @@ router.post("/", async (req: Request, res: Response) => {
         }
 
         await connection.query(
-            `INSERT INTO user_info (email, password, username) VALUES (?, ?, ?)`,
-            [NewUser.email, encryptedPassword, NewUser.username]
+            `INSERT INTO user_info (email, password, user_name) VALUES (?, ?, ?)`,
+            [NewUser.email, encryptedPassword, NewUser.userName]
         )
 
         res.status(200).json({

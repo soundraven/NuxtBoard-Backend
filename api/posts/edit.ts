@@ -17,16 +17,16 @@ router.post("/", async (req: Request, res: Response) => {
         } as ApiResponse)
     }
 
-    const postinfo = req.body.post
+    const postInfo = req.body.post
 
     const edit = `UPDATE post SET board_id = ?, title = ?, content = ? WHERE id = ?`
 
     try {
         await connection.query(edit, [
-            postinfo.boardId,
-            postinfo.title,
-            postinfo.content,
-            postinfo.id,
+            postInfo.boardId,
+            postInfo.title,
+            postInfo.content,
+            postInfo.id,
         ])
 
         res.status(200).json({
