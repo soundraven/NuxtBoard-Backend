@@ -36,16 +36,36 @@ enum BoardId {
 
 interface PostInfo {
     id: number
-    board_id: number
-    registered_by: number
-    registered_date: number
+    boardId: number
+    registeredBy: number
+    registeredDate: number
     title: string
     content: string
-    formatted_date?: Dayjs
+    formattedDate?: Dayjs
 }
 
 interface GroupedPost {
     [key: number]: PostInfo[]
+}
+
+interface CommentInfo {
+    id: number
+    postId: number
+    registeredBy: number
+    userName: string
+    registeredDate: number
+    content: string
+    formattedDate?: Dayjs
+}
+interface ReplyInfo {
+    id: number
+    postId: number
+    commentId: number
+    registeredBy: number
+    userName: string
+    registeredDate: number
+    content: string
+    formattedDate?: Dayjs
 }
 
 export type {
@@ -55,5 +75,7 @@ export type {
     LoginUserInfo,
     PostInfo,
     GroupedPost,
+    CommentInfo,
+    ReplyInfo,
 }
 export { BoardId }

@@ -4,7 +4,6 @@ import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { ResultSetHeader } from "mysql2"
-import camelcaseKeys from "camelcase-keys"
 
 dotenv.config()
 

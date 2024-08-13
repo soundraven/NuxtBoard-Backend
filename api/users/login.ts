@@ -10,8 +10,7 @@ import {
     generateToken,
     refreshTokenExpires,
 } from "../utils/generateToken"
-
-import convertToCamelcase from "../utils/convertToCamelcase"
+import { convertToCamelcase } from "../utils/convertToCamelcase"
 
 dotenv.config()
 

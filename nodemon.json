@@ -2,5 +2,5 @@
     "watch": ["src"],
     "ext": "ts",
     "ignore": ["node_modules"],
-    "exec": "ts-node ./api/index.ts"
+    "exec": "node --loader ts-node/esm src/index.ts"
 }

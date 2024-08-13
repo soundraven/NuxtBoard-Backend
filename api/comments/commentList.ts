@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express"
-import { ApiResponse } from "../structure/interface"
+import { ApiResponse, CommentInfo, ReplyInfo } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
+import { convertToCamelcase } from "../utils/convertToCamelcase"
 
 dotenv.config()
 
@@ -18,7 +19,7 @@ router.get("/:id", async (req: Request, res: Response) => {
         const postId = req.params.id
 
         const [commentListResult, replyListResult] = await Promise.all([
-            connection.query<RowDataPacket[]>(
+            connection.query<CommentInfo[] & RowDataPacket[]>(
                 `SELECT 
                     comment.*,
                     user_info.user_name
@@ -30,7 +31,7 @@ router.get("/:id", async (req: Request, res: Response) => {
                     post_id = ? AND comment.active = 1`,
                 [postId]
             ),
-            connection.query<RowDataPacket[]>(
+            connection.query<ReplyInfo[] & RowDataPacket[]>(
                 `SELECT 
                     reply.*,
                     user_info.user_name
@@ -44,10 +45,17 @@ router.get("/:id", async (req: Request, res: Response) => {
             ),
         ])
 
-        const mappedCommentList = commentListResult[0].map((comment) => ({
+        const commentList = await convertToCamelcase<CommentInfo[]>(
+            commentListResult[0] as CommentInfo[]
+        )
+        const replyList = await convertToCamelcase<ReplyInfo[]>(
+            replyListResult[0] as ReplyInfo[]
+        )
+
+        const mappedCommentList = commentList.map((comment) => ({
             ...comment,
-            replies: replyListResult[0].filter(
-                (reply) => reply.comment_id === comment.id
+            replies: replyList.filter(
+                (reply) => reply.commentId === comment.id
             ),
         }))
 

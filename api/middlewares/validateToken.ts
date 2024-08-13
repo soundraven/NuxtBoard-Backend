@@ -5,14 +5,13 @@ import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import dotenv from "dotenv"
 import jwt from "jsonwebtoken"
-
-import convertToCamelcase from "../utils/convertToCamelcase"
+import { convertToCamelcase } from "../utils/convertToCamelcase"
 
 dotenv.config()
 
-const selectToken = `SELECT * 
-        FROM user_auths
-        WHERE token = ? AND expires > NOW()`
+// const selectToken = `SELECT *
+//         FROM user_auths
+//         WHERE token = ? AND expires > NOW()`
 
 export default async function validateToken(
     req: Request,

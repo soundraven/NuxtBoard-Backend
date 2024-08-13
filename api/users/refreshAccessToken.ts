@@ -6,8 +6,7 @@ import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import { accessTokenExpires, generateToken } from "../utils/generateToken"
 import jwt from "jsonwebtoken"
-
-import convertToCamelcase from "../utils/convertToCamelcase"
+import { convertToCamelcase } from "../utils/convertToCamelcase"
 
 dotenv.config()
 

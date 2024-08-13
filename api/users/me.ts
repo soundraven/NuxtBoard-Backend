@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express"
 import { ApiResponse, UserInfo } from "../structure/interface"
-import convertToCamelcase from "../utils/convertToCamelcase"
+import { convertToCamelcase } from "../utils/convertToCamelcase"
 
 const router = express.Router()
 

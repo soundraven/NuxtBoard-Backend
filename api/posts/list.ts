@@ -1,10 +1,14 @@
 import express, { Request, Response } from "express"
-import { ApiResponse, PostInfo } from "../structure/interface"
+import { ApiResponse, GroupedPost, PostInfo } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import dayjs from "dayjs"
+import {
+    convertArrayToCamelcase,
+    convertToCamelcase,
+} from "../utils/convertToCamelcase"
 
 dotenv.config()
 
@@ -72,10 +76,13 @@ router.get("/", async (req: Request, res: Response) => {
             [registeredByNum].filter(Boolean)
         )
 
-        const postList = postListResult as PostInfo[]
+        const postList = convertArrayToCamelcase<PostInfo>(
+            postListResult as PostInfo[]
+        )
+        console.log(postList)
 
-        const groupedPost = postList.reduce((acc, post) => {
-            const key = post.board_id
+        const groupedPost: GroupedPost = postList.reduce((acc, post) => {
+            const key = post.boardId
             if (!acc[key]) {
                 acc[key] = []
             }
@@ -87,7 +94,7 @@ router.get("/", async (req: Request, res: Response) => {
             const numberKey = Number(key)
             groupedPost[numberKey] = groupedPost[numberKey].map((item) => ({
                 ...item,
-                formatted_date: dayjs(item.registered_date).format(
+                formatted_date: dayjs(item.registeredDate).format(
                     "YYYY-MM-DD HH:mm:ss"
                 ),
             }))
