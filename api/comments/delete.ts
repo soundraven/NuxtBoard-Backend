@@ -18,12 +18,12 @@ router.post("/", async (req: Request, res: Response) => {
         } as ApiResponse)
     }
 
-    const commentId = req.body.commentId
-
-    const deleteComment = `UPDATE comment SET active = 0 WHERE id = ?`
-
     try {
-        const result = await connection.execute(deleteComment, [commentId])
+        const commentId = req.body.commentId
+
+        await connection.execute(`UPDATE comment SET active = 0 WHERE id = ?`, [
+            commentId,
+        ])
 
         res.status(200).json({
             code: "S",

@@ -14,42 +14,39 @@ router.get("/:id", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const postId = req.params.id
-
-    const getCommentList = `SELECT 
-        comment.*,
-        user_info.user_name
-    FROM 
-        comment
-    LEFT JOIN 
-        user_info ON comment.registered_by = user_info.id
-    WHERE
-        post_id = ? AND comment.active = 1`
-
-    const getReplyList = `SELECT 
-        reply.*,
-        user_info.user_name
-    FROM 
-        reply
-    LEFT JOIN 
-        user_info ON reply.registered_by = user_info.id
-    WHERE
-        post_id = ? AND reply.active = 1`
-
     try {
+        const postId = req.params.id
+
         const [commentListResult, replyListResult] = await Promise.all([
-            connection.query<RowDataPacket[]>(getCommentList, [postId]),
-            connection.query<RowDataPacket[]>(getReplyList, [postId]),
+            connection.query<RowDataPacket[]>(
+                `SELECT 
+                    comment.*,
+                    user_info.user_name
+                FROM 
+                    comment
+                LEFT JOIN 
+                    user_info ON comment.registered_by = user_info.id
+                WHERE
+                    post_id = ? AND comment.active = 1`,
+                [postId]
+            ),
+            connection.query<RowDataPacket[]>(
+                `SELECT 
+                    reply.*,
+                    user_info.user_name
+                FROM 
+                    reply
+                LEFT JOIN 
+                    user_info ON reply.registered_by = user_info.id
+                WHERE
+                    post_id = ? AND reply.active = 1`,
+                [postId]
+            ),
         ])
 
-        const commentList = commentListResult[0]
-        const replyList = replyListResult[0]
-
-        console.log(commentList, replyList)
-
-        const mappedCommentList = commentList.map((comment) => ({
+        const mappedCommentList = commentListResult[0].map((comment) => ({
             ...comment,
-            replies: replyList.filter(
+            replies: replyListResult[0].filter(
                 (reply) => reply.comment_id === comment.id
             ),
         }))

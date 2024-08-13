@@ -15,20 +15,20 @@ router.get("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const { currentPage, pageSize, registeredBy } = req.query as {
-        currentPage: string
-        pageSize: string
-        registeredBy: string
-    }
+    try {
+        const { currentPage, pageSize, registeredBy } = req.query as {
+            currentPage: string
+            pageSize: string
+            registeredBy: string
+        }
 
-    const currentPageNum = parseInt(currentPage) - 1 // 프론트에서 현재 페이지 1 기준 시작
-    const pageSizeNum = parseInt(pageSize)
-    const registeredByNum = registeredBy ? parseInt(registeredBy) : null
+        const currentPageNum = parseInt(currentPage) - 1 // 프론트에서 현재 페이지 1 기준 시작
+        const pageSizeNum = parseInt(pageSize)
+        const registeredByNum = registeredBy ? parseInt(registeredBy) : null
+        const listSize = currentPageNum * pageSizeNum
 
-    const listSize = currentPageNum * pageSizeNum
-
-    let getPostList = `
-        SELECT 
+        let getPostList = `
+        SELECT
             post.*,
             board_info.board_id AS board_id,
             board_info.board_name
@@ -37,35 +37,36 @@ router.get("/", async (req: Request, res: Response) => {
         LEFT JOIN 
             board_info ON post.board_id = board_info.board_id
         WHERE 
-            post.active = 1
-    `
+            post.active = 1`
 
-    let getCount = `
-        SELECT COUNT(*) as totalPosts
-        FROM post
-        WHERE post.active = 1
-    `
+        let getCount = `
+            SELECT
+                COUNT(*) as totalPosts
+            FROM
+                post
+            WHERE 
+                post.active = 1`
 
-    const params: any[] = []
+        const params: any[] = []
 
-    if (registeredByNum !== null && !isNaN(registeredByNum)) {
-        getPostList += ` AND post.registered_by = ? `
-        getCount += ` AND post.registered_by = ? `
-        params.push(registeredByNum)
-    }
+        if (registeredByNum !== null && !isNaN(registeredByNum)) {
+            getPostList += ` AND post.registered_by = ? `
+            getCount += ` AND post.registered_by = ? `
+            params.push(registeredByNum)
+        }
 
-    getPostList += `
+        getPostList += `
         ORDER BY
             post.id DESC
         LIMIT ?,?`
 
-    params.push(listSize, pageSizeNum)
+        params.push(listSize, pageSizeNum)
 
-    try {
         const [postListResult] = await connection.query<RowDataPacket[]>(
             getPostList,
             params
         )
+
         const [countResult] = await connection.query<RowDataPacket[]>(
             getCount,
             [registeredByNum].filter(Boolean)

@@ -16,28 +16,30 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     const postId = req.params.id
 
-    const getPostInfo = `SELECT 
-        post.*,
-        board_info.board_id AS board_info_board_id,
-        board_info.board_name
-    FROM 
-        post
-    LEFT JOIN 
-        board_info ON post.board_id = board_info.board_id
-    WHERE
-        post.id = ?`
-
-    const getLikeInfo = `SELECT 
-        SUM(liked) AS total_likes, SUM(disliked) AS total_dislikes
-    FROM 
-        like_info 
-    WHERE 
-        post_id = ?`
-
     try {
         const [postInfo, likeInfo] = await Promise.all([
-            connection.query<RowDataPacket[]>(getPostInfo, [postId]),
-            connection.query<RowDataPacket[]>(getLikeInfo, [postId]),
+            connection.query<RowDataPacket[]>(
+                `SELECT 
+                    post.*,
+                    board_info.board_id AS board_info_board_id,
+                    board_info.board_name
+                FROM 
+                    post
+                LEFT JOIN 
+                    board_info ON post.board_id = board_info.board_id
+                WHERE
+                    post.id = ?`,
+                [postId]
+            ),
+            connection.query<RowDataPacket[]>(
+                `SELECT 
+                    SUM(liked) AS total_likes, SUM(disliked) AS total_dislikes
+                FROM 
+                    like_info 
+                WHERE 
+                    post_id = ?`,
+                [postId]
+            ),
         ])
 
         res.status(200).json({

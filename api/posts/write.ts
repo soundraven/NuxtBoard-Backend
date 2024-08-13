@@ -11,28 +11,24 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    if (res.locals.validatedUser.user.id !== req.body.user.id) {
-        res.status(200).json({
-            code: "E",
-            errorCode: "006",
-            message: "validation failed",
-        })
-    }
-
-    const postInfo = req.body.post
-    const registeredBy = res.locals.validatedUser.user.id
-
-    const write = `INSERT INTO 
-        post (board_id, title, content, registered_by) 
-        VALUES (?, ?, ?, ?)`
-
     try {
-        const result = await connection.execute<ResultSetHeader>(write, [
-            postInfo.boardId,
-            postInfo.title,
-            postInfo.content,
-            registeredBy,
-        ])
+        if (res.locals.validatedUser.user.id !== req.body.user.id) {
+            res.status(200).json({
+                code: "E",
+                errorCode: "006",
+                message: "validation failed",
+            })
+        }
+
+        const postInfo = req.body.post
+        const registeredBy = res.locals.validatedUser.user.id
+
+        const result = await connection.execute<ResultSetHeader>(
+            `INSERT INTO 
+                post (board_id, title, content, registered_by) 
+            VALUES (?, ?, ?, ?)`,
+            [postInfo.boardId, postInfo.title, postInfo.content, registeredBy]
+        )
 
         if (result[0].affectedRows < 1) {
             return res.status(200).json({

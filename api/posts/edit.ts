@@ -19,15 +19,11 @@ router.post("/", async (req: Request, res: Response) => {
 
     const postInfo = req.body.post
 
-    const edit = `UPDATE post SET board_id = ?, title = ?, content = ? WHERE id = ?`
-
     try {
-        await connection.query(edit, [
-            postInfo.boardId,
-            postInfo.title,
-            postInfo.content,
-            postInfo.id,
-        ])
+        await connection.query(
+            `UPDATE post SET board_id = ?, title = ?, content = ? WHERE id = ?`,
+            [postInfo.boardId, postInfo.title, postInfo.content, postInfo.id]
+        )
 
         res.status(200).json({
             code: "S",

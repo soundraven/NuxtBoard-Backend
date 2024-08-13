@@ -6,6 +6,7 @@ import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import { accessTokenExpires, generateToken } from "../utils/generateToken"
 import jwt from "jsonwebtoken"
+import camelcaseKeys from "camelcase-keys"
 
 dotenv.config()
 
@@ -16,15 +17,16 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const refreshToken: string = req.body.refreshToken
-    if (!refreshToken) {
-        return res.status(401).json({
-            code: "F",
-            message: "Auth failed",
-        } as ApiResponse)
-    }
-
     try {
+        const refreshToken: string = req.body.refreshToken
+
+        if (!refreshToken) {
+            return res.status(401).json({
+                code: "F",
+                message: "Auth failed",
+            } as ApiResponse)
+        }
+
         const decoded = jwt.verify(
             refreshToken,
             process.env.JWT_SECRET as string
@@ -45,7 +47,7 @@ router.post("/", async (req: Request, res: Response) => {
             })
         }
 
-        const user = dbUserInfo[0]
+        const user = camelcaseKeys(dbUserInfo[0])
 
         const newAccessToken = generateToken(user, accessTokenExpires, "access")
         console.log(newAccessToken)

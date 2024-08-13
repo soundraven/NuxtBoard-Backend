@@ -18,15 +18,13 @@ router.post("/", async (req: Request, res: Response) => {
         } as ApiResponse)
     }
 
-    const comment = req.body.comment
-    const commentId = req.body.commentId
-
-    const edit = `UPDATE comment SET content = ? WHERE id = ?`
-
     try {
-        const result = await connection.execute(edit, [comment, commentId])
+        const { comment, commentId } = req.body
 
-        console.log(result)
+        await connection.execute(
+            `UPDATE comment SET content = ? WHERE id = ?`,
+            [comment, commentId]
+        )
 
         res.status(200).json({
             code: "S",

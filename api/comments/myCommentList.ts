@@ -14,18 +14,16 @@ router.get("/:registeredBy", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const registeredBy = req.params.registeredBy
-
-    const getCommentList = `SELECT 
-        comment.*
-    FROM 
-        comment
-    WHERE
-        registered_by = ?`
-
     try {
+        const registeredBy = req.params.registeredBy
+
         const [commentList] = await connection.query<RowDataPacket[]>(
-            getCommentList,
+            `SELECT 
+            comment.*
+        FROM 
+            comment
+        WHERE
+            registered_by = ?`,
             [registeredBy]
         )
 
