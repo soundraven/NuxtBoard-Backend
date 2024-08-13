@@ -15,21 +15,21 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const NewUser: NewUser = req.body.user
-
-    if (!NewUser.email || !NewUser.password) {
-        return res.status(400).json({
-            code: "F",
-            message: "UserInfo not exist",
-        } as ApiResponse)
-    }
-
-    const encryptedPassword: string = crypto
-        .createHash("sha256")
-        .update(NewUser.password + process.env.PWSALT)
-        .digest("hex")
-
     try {
+        const NewUser: NewUser = req.body.user
+
+        if (!NewUser.email || !NewUser.password) {
+            return res.status(400).json({
+                code: "F",
+                message: "UserInfo not exist",
+            } as ApiResponse)
+        }
+
+        const encryptedPassword: string = crypto
+            .createHash("sha256")
+            .update(NewUser.password + process.env.PWSALT)
+            .digest("hex")
+
         const [result] = await connection.query<RowDataPacket[]>(
             `SELECT COUNT(email) AS count FROM user_info WHERE email = ?`,
             [NewUser.email]

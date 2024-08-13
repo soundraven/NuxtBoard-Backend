@@ -10,6 +10,7 @@ import {
     generateToken,
     refreshTokenExpires,
 } from "../utils/generateToken"
+import convertToCamelcase from "../utils/convertToCamelcase"
 
 dotenv.config()
 
@@ -20,21 +21,21 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    const loginUser: LoginUserInfo = req.body.user
-
-    if (!loginUser.email || !loginUser.password) {
-        return res.status(400).json({
-            code: "F",
-            message: "UserInfo not exist",
-        } as ApiResponse)
-    }
-
-    const encryptedPassword: string = crypto
-        .createHash("sha256")
-        .update(loginUser.password + process.env.PWSALT)
-        .digest("hex")
-
     try {
+        const loginUser: LoginUserInfo = req.body.user
+
+        if (!loginUser.email || !loginUser.password) {
+            return res.status(400).json({
+                code: "F",
+                message: "UserInfo not exist",
+            } as ApiResponse)
+        }
+
+        const encryptedPassword: string = crypto
+            .createHash("sha256")
+            .update(loginUser.password + process.env.PWSALT)
+            .digest("hex")
+
         const [dbUserInfo] = await connection.execute<
             LoginUserInfo[] & RowDataPacket[]
         >(
@@ -67,7 +68,8 @@ router.post("/", async (req: Request, res: Response) => {
         }
 
         const { password, ...userWithoutPassword } = dbUserInfo[0]
-        const user: UserInfo = userWithoutPassword
+        const user = convertToCamelcase<UserInfo>(userWithoutPassword)
+        console.log(user)
 
         const [refreshToken, accessToken] = await Promise.all([
             generateToken(user, refreshTokenExpires, "refresh"),

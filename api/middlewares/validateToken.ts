@@ -5,6 +5,7 @@ import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import dotenv from "dotenv"
 import jwt from "jsonwebtoken"
+import convertToCamelcase from "../utils/convertToCamelcase"
 
 dotenv.config()
 
@@ -60,7 +61,9 @@ export default async function validateToken(
             } as ApiResponse)
         }
 
-        res.locals.validatedUser = { user: user[0], token: token }
+        const camelcaseUser = convertToCamelcase<UserInfo>(user[0])
+
+        res.locals.validatedUser = { user: camelcaseUser, token: token }
         next()
     } catch (error) {
         errorHandler(res, error as Error)

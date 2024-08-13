@@ -11,26 +11,20 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    if (res.locals.validatedUser.user.id !== req.body.user.id) {
-        return res.status(200).json({
-            code: "E",
-            errorCode: "006",
-            message: "Validation failed.",
-        } as ApiResponse)
-    }
-
-    const postId = req.body.postId
-    const reportedBy = res.locals.validatedUser.user.id
-
-    const reportHistory = `SELECT * FROM report WHERE post_id = ? AND reported_by = ?`
-    const insertReport = `INSERT INTO report (post_id, reported_by) VALUES (?, ?)`
-    const reportPost = `UPDATE post SET report = report + 1 WHERE id = ?`
-    const reportCountCheck = `SELECT report FROM post WHERE id = ?`
-    const autoDelete = `UPDATE post SET active = 0 WHERE id = ?`
-
     try {
+        if (res.locals.validatedUser.user.id !== req.body.user.id) {
+            return res.status(200).json({
+                code: "E",
+                errorCode: "006",
+                message: "Validation failed.",
+            } as ApiResponse)
+        }
+
+        const postId = req.body.postId
+        const reportedBy = res.locals.validatedUser.user.id
+
         const [checkHistory] = await connection.execute<RowDataPacket[]>(
-            reportHistory,
+            `SELECT * FROM report WHERE post_id = ? AND reported_by = ?`,
             [postId, reportedBy]
         )
         console.log(checkHistory)
@@ -43,18 +37,27 @@ router.post("/", async (req: Request, res: Response) => {
         }
 
         await Promise.all([
-            connection.execute(insertReport, [postId, reportedBy]),
-            connection.execute(reportPost, [postId]),
+            connection.execute(
+                `INSERT INTO report (post_id, reported_by) VALUES (?, ?)`,
+                [postId, reportedBy]
+            ),
+            connection.execute(
+                `UPDATE post SET report = report + 1 WHERE id = ?`,
+                [postId]
+            ),
         ])
 
         const [reportCount] = await connection.execute<RowDataPacket[]>(
-            reportCountCheck,
+            `SELECT report FROM post WHERE id = ?`,
             [postId]
         )
         console.log(reportCount[0])
 
         if (reportCount[0].report >= 5) {
-            await connection.execute<RowDataPacket[]>(autoDelete, [postId])
+            await connection.execute<RowDataPacket[]>(
+                `UPDATE post SET active = 0 WHERE id = ?`,
+                [postId]
+            )
 
             return res.status(200).json({
                 code: "S",

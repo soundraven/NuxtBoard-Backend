@@ -19,27 +19,15 @@ router.post("/", async (req: Request, res: Response) => {
         } as ApiResponse)
     }
 
-    const postId = req.body.postId
-    const comment = req.body.comment
-    const reply = req.body.reply
-    const commentId = req.body.commentId
-    const registeredBy = res.locals.validatedUser.user.id
-
-    console.log(commentId)
-    console.log(reply)
-
-    const writeComment = `INSERT INTO 
-        comment (post_id, content, registered_by) 
-        VALUES (?, ?, ?)`
-
-    const writeReply = `INSERT INTO 
-        reply (post_id, comment_id, content, registered_by) 
-        VALUES (?, ?, ?, ?)`
+    const { postId, comment, reply, commentId } = req.body
+    const registeredBy = req.body.user.id
 
     if (commentId) {
         try {
             const result = await connection.execute<ResultSetHeader>(
-                writeReply,
+                `INSERT INTO 
+                    reply (post_id, comment_id, content, registered_by) 
+                VALUES (?, ?, ?, ?)`,
                 [postId, commentId, reply, registeredBy]
             )
 
@@ -60,11 +48,12 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     try {
-        const result = await connection.execute<ResultSetHeader>(writeComment, [
-            postId,
-            comment,
-            registeredBy,
-        ])
+        const result = await connection.execute<ResultSetHeader>(
+            `INSERT INTO 
+                comment (post_id, content, registered_by) 
+            VALUES (?, ?, ?)`,
+            [postId, comment, registeredBy]
+        )
 
         if (result[0].affectedRows < 1) {
             return res.status(200).json({

@@ -1,12 +1,14 @@
 import express, { Request, Response } from "express"
-import { ApiResponse } from "../structure/interface"
+import { ApiResponse, UserInfo } from "../structure/interface"
+import convertToCamelcase from "../utils/convertToCamelcase"
+
 const router = express.Router()
 
 router.get("/", async (req: Request, res: Response) => {
     res.status(200).json({
         code: "S",
         message: "User authenticated",
-        user: res.locals.validatedUser.user,
+        user: convertToCamelcase<UserInfo>(res.locals.validatedUser.user),
         accessToken: res.locals.validatedUser.token,
     } as ApiResponse)
 })

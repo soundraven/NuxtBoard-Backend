@@ -21,16 +21,13 @@ router.post("/", async (req: Request, res: Response) => {
         } as ApiResponse)
     }
 
-    const user = req.body.user
-    const userName = req.body.userName
-
-    const setUserName = `UPDATE user_info SET username = ? WHERE id = ?`
-
     try {
-        await connection.execute<RowDataPacket[]>(setUserName, [
-            userName,
-            user.id,
-        ])
+        const { user, userName } = req.body
+
+        await connection.execute<RowDataPacket[]>(
+            `UPDATE user_info SET user_name = ? WHERE id = ?`,
+            [userName, user.id]
+        )
 
         res.status(200).json({
             code: "S",

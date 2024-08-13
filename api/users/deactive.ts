@@ -14,27 +14,22 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    if (!req.body || !req.body.user.id) {
-        return res.status(200).json({
-            code: "E",
-            errorCode: "001",
-            message: "UserInfo not exist",
-        } as ApiResponse)
-    }
-
-    const validatedUser = res.locals.validatedUser
-    console.log(validatedUser)
-    console.log(req.body.user)
-    console.log(req.headers["authorization"]?.split(" ")[1] || "")
-
-    const user = req.body.user
-    const token = req.headers["authorization"]?.split(" ")[1] || ""
-
-    const deactivateQuery = ` UPDATE user_info
-        SET active = 0
-        WHERE id = ?`
-
     try {
+        if (!req.body || !req.body.user.id) {
+            return res.status(200).json({
+                code: "E",
+                errorCode: "001",
+                message: "UserInfo not exist",
+            } as ApiResponse)
+        }
+
+        const validatedUser = res.locals.validatedUser
+
+        console.log(req.headers["authorization"]?.split(" ")[1] || "")
+
+        const user = req.body.user
+        const token = req.headers["authorization"]?.split(" ")[1] || ""
+
         if (
             user.id !== validatedUser.user.id ||
             token !== validatedUser.token
@@ -46,7 +41,7 @@ router.post("/", async (req: Request, res: Response) => {
         }
 
         const [deactivate] = await connection.execute<ResultSetHeader>(
-            deactivateQuery,
+            `UPDATE user_info SET active = 0 WHERE id = ?`,
             [user.id]
         )
 
