@@ -8,7 +8,9 @@ router.get("/", async (req: Request, res: Response) => {
     res.status(200).json({
         code: "S",
         message: "User authenticated",
+
         user: convertToCamelcase<UserInfo>(res.locals.validatedUser.user),
+
         accessToken: res.locals.validatedUser.token,
     } as ApiResponse)
 })

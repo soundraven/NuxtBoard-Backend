@@ -10,6 +10,7 @@ import {
     generateToken,
     refreshTokenExpires,
 } from "../utils/generateToken"
+
 import convertToCamelcase from "../utils/convertToCamelcase"
 
 dotenv.config()
@@ -68,8 +69,8 @@ router.post("/", async (req: Request, res: Response) => {
         }
 
         const { password, ...userWithoutPassword } = dbUserInfo[0]
+
         const user = convertToCamelcase<UserInfo>(userWithoutPassword)
-        console.log(user)
 
         const [refreshToken, accessToken] = await Promise.all([
             generateToken(user, refreshTokenExpires, "refresh"),
