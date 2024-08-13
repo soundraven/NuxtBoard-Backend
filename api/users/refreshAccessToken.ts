@@ -6,7 +6,8 @@ import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import { accessTokenExpires, generateToken } from "../utils/generateToken"
 import jwt from "jsonwebtoken"
-import camelcaseKeys from "camelcase-keys"
+
+import convertToCamelcase from "../utils/convertToCamelcase"
 
 dotenv.config()
 
@@ -47,10 +48,10 @@ router.post("/", async (req: Request, res: Response) => {
             })
         }
 
-        const user = camelcaseKeys(dbUserInfo[0])
+        const user = convertToCamelcase<UserInfo>(dbUserInfo[0])
 
+        console.log(user)
         const newAccessToken = generateToken(user, accessTokenExpires, "access")
-        console.log(newAccessToken)
 
         res.status(200).json({
             code: "S",
