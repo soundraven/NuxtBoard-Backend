@@ -5,10 +5,7 @@ import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import dayjs from "dayjs"
-import {
-    convertArrayToCamelcase,
-    convertToCamelcase,
-} from "../utils/convertToCamelcase"
+import { convertArrayToCamelcase } from "../utils/convertToCamelcase"
 
 dotenv.config()
 
@@ -18,28 +15,34 @@ router.get("/", async (req: Request, res: Response) => {
     if (!connection) {
         return errorHandler(res, new Error("Database connection not available"))
     }
+    console.log(req.query)
 
     try {
-        const { currentPage, pageSize, registeredBy } = req.query as {
+        const { currentPage, pageSize, registeredBy, boardId } = req.query as {
             currentPage: string
             pageSize: string
             registeredBy: string
+            boardId: string
         }
 
         const currentPageNum = parseInt(currentPage) - 1 // 프론트에서 현재 페이지 1 기준 시작
         const pageSizeNum = parseInt(pageSize)
         const registeredByNum = registeredBy ? parseInt(registeredBy) : null
+        const boardIdNum = boardId ? parseInt(boardId) : null
         const listSize = currentPageNum * pageSizeNum
 
         let getPostList = `
         SELECT
             post.*,
             board_info.board_id AS board_id,
-            board_info.board_name
+            board_info.board_name,
+            user_info.user_name AS registeredUserName
         FROM 
             post
         LEFT JOIN 
             board_info ON post.board_id = board_info.board_id
+        LEFT JOIN
+            user_info ON post.registered_by = user_info.id
         WHERE 
             post.active = 1`
 
@@ -52,6 +55,12 @@ router.get("/", async (req: Request, res: Response) => {
                 post.active = 1`
 
         const params: any[] = []
+
+        if (boardIdNum !== null && !isNaN(boardIdNum)) {
+            getPostList += ` AND post.board_id = ? `
+            getCount += ` AND post.board_id = ? `
+            params.push(boardIdNum)
+        }
 
         if (registeredByNum !== null && !isNaN(registeredByNum)) {
             getPostList += ` AND post.registered_by = ? `
@@ -66,14 +75,14 @@ router.get("/", async (req: Request, res: Response) => {
 
         params.push(listSize, pageSizeNum)
 
-        const [postListResult] = await connection.query<RowDataPacket[]>(
+        const [postListResult] = await connection.execute<RowDataPacket[]>(
             getPostList,
             params
         )
 
-        const [countResult] = await connection.query<RowDataPacket[]>(
+        const [countResult] = await connection.execute<RowDataPacket[]>(
             getCount,
-            [registeredByNum].filter(Boolean)
+            params.slice(0, -2)
         )
 
         const postList = convertArrayToCamelcase<PostInfo>(

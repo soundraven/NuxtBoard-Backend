@@ -30,7 +30,7 @@ router.post("/", async (req: Request, res: Response) => {
             .update(NewUser.password + process.env.PWSALT)
             .digest("hex")
 
-        const [result] = await connection.query<RowDataPacket[]>(
+        const [result] = await connection.execute<RowDataPacket[]>(
             `SELECT COUNT(email) AS count FROM user_info WHERE email = ?`,
             [NewUser.email]
         )
@@ -42,7 +42,7 @@ router.post("/", async (req: Request, res: Response) => {
             } as ApiResponse)
         }
 
-        await connection.query(
+        await connection.execute(
             `INSERT INTO user_info (email, password, user_name) VALUES (?, ?, ?)`,
             [NewUser.email, encryptedPassword, NewUser.userName]
         )

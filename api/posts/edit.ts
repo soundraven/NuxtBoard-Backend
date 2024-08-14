@@ -20,7 +20,7 @@ router.post("/", async (req: Request, res: Response) => {
     const postInfo = req.body.post
 
     try {
-        await connection.query(
+        await connection.execute(
             `UPDATE post SET board_id = ?, title = ?, content = ? WHERE id = ?`,
             [postInfo.boardId, postInfo.title, postInfo.content, postInfo.id]
         )

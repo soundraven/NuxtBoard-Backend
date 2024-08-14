@@ -17,7 +17,7 @@ router.get("/:registeredBy", async (req: Request, res: Response) => {
     try {
         const registeredBy = req.params.registeredBy
 
-        const [commentList] = await connection.query<RowDataPacket[]>(
+        const [commentList] = await connection.execute<RowDataPacket[]>(
             `SELECT 
             comment.*
         FROM 

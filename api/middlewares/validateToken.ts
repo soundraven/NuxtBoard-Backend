@@ -42,7 +42,7 @@ export default async function validateToken(
         ) as jwt.JwtPayload
         const userId = decoded.id
         console.log("validateUserId:", userId)
-        const [user] = await connection.query<UserInfo[] & RowDataPacket[]>(
+        const [user] = await connection.execute<UserInfo[] & RowDataPacket[]>(
             `SELECT id, email, user_name, registered_date, active FROM user_info WHERE id = ?`,
             [userId]
         )

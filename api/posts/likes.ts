@@ -7,7 +7,6 @@ import { RowDataPacket } from "mysql2"
 const router = express.Router()
 
 router.post("/like", async (req: Request, res: Response) => {
-    console.log("like")
     if (!connection) {
         return errorHandler(res, new Error("Database connection not available"))
     }
@@ -24,7 +23,7 @@ router.post("/like", async (req: Request, res: Response) => {
         const postId = req.body.postId
         const userId = res.locals.validatedUser.user.id
 
-        const [likedHistory] = await connection.query<RowDataPacket[]>(
+        const [likedHistory] = await connection.execute<RowDataPacket[]>(
             `SELECT liked, disliked FROM like_info WHERE post_id = ? AND registered_by = ?`,
             [postId, userId]
         )
@@ -77,7 +76,7 @@ router.post("/dislike", async (req: Request, res: Response) => {
         const postId = req.body.postId
         const userId = res.locals.validatedUser.user.id
 
-        const [likedHistory] = await connection.query<RowDataPacket[]>(
+        const [likedHistory] = await connection.execute<RowDataPacket[]>(
             `SELECT liked, disliked FROM like_info WHERE post_id = ? AND registered_by = ?`,
             [postId, userId]
         )

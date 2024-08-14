@@ -22,7 +22,7 @@ router.get("/:id", async (req: Request, res: Response) => {
         const postId = req.params.id
 
         const [commentListResult, replyListResult] = await Promise.all([
-            connection.query<CommentInfo[] & RowDataPacket[]>(
+            connection.execute<CommentInfo[] & RowDataPacket[]>(
                 `SELECT 
                     comment.*,
                     user_info.user_name
@@ -34,7 +34,7 @@ router.get("/:id", async (req: Request, res: Response) => {
                     post_id = ? AND comment.active = 1`,
                 [postId]
             ),
-            connection.query<ReplyInfo[] & RowDataPacket[]>(
+            connection.execute<ReplyInfo[] & RowDataPacket[]>(
                 `SELECT 
                     reply.*,
                     user_info.user_name

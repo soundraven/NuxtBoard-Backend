@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
+import { convertToCamelcase } from "../utils/convertToCamelcase"
 
 dotenv.config()
 
@@ -18,7 +19,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     try {
         const [postInfo, likeInfo] = await Promise.all([
-            connection.query<RowDataPacket[]>(
+            connection.execute<RowDataPacket[]>(
                 `SELECT 
                     post.*,
                     board_info.board_id AS board_info_board_id,
@@ -31,7 +32,7 @@ router.get("/:id", async (req: Request, res: Response) => {
                     post.id = ?`,
                 [postId]
             ),
-            connection.query<RowDataPacket[]>(
+            connection.execute<RowDataPacket[]>(
                 `SELECT 
                     SUM(liked) AS total_likes, SUM(disliked) AS total_dislikes
                 FROM 
@@ -42,11 +43,14 @@ router.get("/:id", async (req: Request, res: Response) => {
             ),
         ])
 
+        const camelcasePostInfo = convertToCamelcase(postInfo[0][0])
+        const camelcaseLikeInfo = convertToCamelcase(likeInfo[0][0])
+
         res.status(200).json({
             code: "S",
             message: "Successfully get list of posts",
-            postInfo: postInfo[0][0],
-            likeInfo: likeInfo[0][0],
+            postInfo: camelcasePostInfo,
+            likeInfo: camelcaseLikeInfo,
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)

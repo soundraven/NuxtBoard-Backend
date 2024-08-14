@@ -25,13 +25,9 @@ interface LoginUserInfo extends UserInfo {
     password: string
 }
 
-enum BoardId {
-    공지 = 1,
-    자유 = 2,
-    유머 = 3,
-    질문 = 4,
-    자랑 = 5,
-    후기 = 6,
+interface BoardInfo {
+    boardId: number
+    boardName: string
 }
 
 interface PostInfo {
@@ -42,6 +38,8 @@ interface PostInfo {
     title: string
     content: string
     formattedDate?: Dayjs
+    boardName: string
+    registeredUserName: string
 }
 
 interface GroupedPost {
@@ -77,5 +75,5 @@ export type {
     GroupedPost,
     CommentInfo,
     ReplyInfo,
+    BoardInfo,
 }
-export { BoardId }
