@@ -79,7 +79,6 @@ router.get("/", async (req: Request, res: Response) => {
         const postList = convertArrayToCamelcase<PostInfo>(
             postListResult as PostInfo[]
         )
-        console.log(postList)
 
         const groupedPost: GroupedPost = postList.reduce((acc, post) => {
             const key = post.boardId

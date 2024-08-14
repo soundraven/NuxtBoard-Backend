@@ -41,11 +41,12 @@ export default async function validateToken(
             process.env.JWT_SECRET as string
         ) as jwt.JwtPayload
         const userId = decoded.id
-
+        console.log("validateUserId:", userId)
         const [user] = await connection.query<UserInfo[] & RowDataPacket[]>(
             `SELECT id, email, user_name, registered_date, active FROM user_info WHERE id = ?`,
             [userId]
         )
+        console.log(user)
 
         if (user.length < 1) {
             return res.status(404).json({

@@ -4,7 +4,10 @@ import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
-import { convertToCamelcase } from "../utils/convertToCamelcase"
+import {
+    convertArrayToCamelcase,
+    convertToCamelcase,
+} from "../utils/convertToCamelcase"
 
 dotenv.config()
 
@@ -45,10 +48,10 @@ router.get("/:id", async (req: Request, res: Response) => {
             ),
         ])
 
-        const commentList = await convertToCamelcase<CommentInfo[]>(
+        const commentList = convertArrayToCamelcase<CommentInfo>(
             commentListResult[0] as CommentInfo[]
         )
-        const replyList = await convertToCamelcase<ReplyInfo[]>(
+        const replyList = convertArrayToCamelcase<ReplyInfo>(
             replyListResult[0] as ReplyInfo[]
         )
 

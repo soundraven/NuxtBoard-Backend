@@ -11,16 +11,8 @@ router.post("/", async (req: Request, res: Response) => {
         return errorHandler(res, new Error("Database connection not available"))
     }
 
-    if (res.locals.validatedUser.user.id !== req.body.user.id) {
-        return res.status(200).json({
-            code: "E",
-            errorCode: "006",
-            message: "Validation failed.",
-        } as ApiResponse)
-    }
-
     const { postId, comment, reply, commentId } = req.body
-    const registeredBy = req.body.user.id
+    const registeredBy = res.locals.validatedUser.user.id
 
     if (commentId) {
         try {
