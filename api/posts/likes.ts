@@ -28,8 +28,6 @@ router.post("/like", async (req: Request, res: Response) => {
             [postId, userId]
         )
 
-        console.log(likedHistory)
-
         if (likedHistory.length > 0) {
             if (likedHistory[0].liked === 1) {
                 return res.status(200).json({
@@ -59,7 +57,6 @@ router.post("/like", async (req: Request, res: Response) => {
 })
 
 router.post("/dislike", async (req: Request, res: Response) => {
-    console.log("dislike")
     if (!connection) {
         return errorHandler(res, new Error("Database connection not available"))
     }
@@ -80,8 +77,6 @@ router.post("/dislike", async (req: Request, res: Response) => {
             `SELECT liked, disliked FROM like_info WHERE post_id = ? AND registered_by = ?`,
             [postId, userId]
         )
-
-        console.log(likedHistory)
 
         if (likedHistory.length > 0) {
             if (likedHistory[0].disliked === 1) {

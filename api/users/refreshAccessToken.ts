@@ -49,7 +49,6 @@ router.post("/", async (req: Request, res: Response) => {
 
         const user = convertToCamelcase<UserInfo>(dbUserInfo[0])
 
-        console.log(user)
         const newAccessToken = generateToken(user, accessTokenExpires, "access")
 
         res.status(200).json({

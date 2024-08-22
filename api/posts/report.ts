@@ -51,7 +51,6 @@ router.post("/", async (req: Request, res: Response) => {
             `SELECT report FROM post WHERE id = ?`,
             [postId]
         )
-        console.log(reportCount[0])
 
         if (reportCount[0].report >= 5) {
             await connection.execute<RowDataPacket[]>(

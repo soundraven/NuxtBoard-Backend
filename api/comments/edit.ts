@@ -6,7 +6,6 @@ import { connection } from "../index"
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-    console.log(req.body)
     if (!connection) {
         return errorHandler(res, new Error("Database connection not available"))
     }

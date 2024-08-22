@@ -25,8 +25,6 @@ router.post("/", async (req: Request, res: Response) => {
 
         const validatedUser = res.locals.validatedUser
 
-        console.log(req.headers["authorization"]?.split(" ")[1] || "")
-
         const user = req.body.user
         const token = req.headers["authorization"]?.split(" ")[1] || ""
 

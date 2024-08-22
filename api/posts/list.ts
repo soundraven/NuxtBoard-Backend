@@ -15,7 +15,6 @@ router.get("/", async (req: Request, res: Response) => {
     if (!connection) {
         return errorHandler(res, new Error("Database connection not available"))
     }
-    console.log(req.query)
 
     try {
         const { currentPage, pageSize, registeredBy, boardId } = req.query as {

@@ -15,7 +15,8 @@ router.get("/", async (req: Request, res: Response) => {
         // 현재 날짜 기준으로 7일 전 날짜 계산
         const sevenDaysAgo = dayjs().subtract(7, "day").format("YYYY-MM-DD")
 
-        const getTopLikedPostsQuery = `
+        const [result] = await connection.execute<RowDataPacket[]>(
+            `
             SELECT 
                 post_id
             FROM 
@@ -27,34 +28,35 @@ router.get("/", async (req: Request, res: Response) => {
             ORDER BY 
                 SUM(liked) DESC
             LIMIT 5
-        `
-
-        const [result] = await connection.execute<RowDataPacket[]>(
-            getTopLikedPostsQuery,
+            `,
             [sevenDaysAgo]
         )
 
+        console.log(result)
+
         const trendPosts = result.map((row) => row.post_id)
 
-        const getPostDetailsQuery = `
+        const [postDetailsResult] = await connection.execute<RowDataPacket[]>(
+            `
             SELECT 
-                id, title, registered_date
+                *
             FROM 
                 post
             WHERE 
                 id IN (?)
-        `
-
-        const [postDetailsResult] = await connection.execute<RowDataPacket[]>(
-            getPostDetailsQuery,
+            `,
             [trendPosts]
         )
+        console.log(trendPosts)
+        console.log(postDetailsResult)
 
         const trendPostsDetails = postDetailsResult.map((row) => ({
             id: row.id,
             title: row.title,
             registeredDate: row.registered_date,
         }))
+
+        console.log(trendPostsDetails)
 
         res.status(200).json({
             code: "S",

@@ -18,7 +18,6 @@ router.get("/", async (req, res) => {
         const [boardInfo] = await connection.execute<
             BoardInfo[] & RowDataPacket[]
         >("SELECT board_id, board_name FROM board_info WHERE active = 1")
-        console.log(boardInfo)
         const camelcaseBoardInfo = convertArrayToCamelcase(
             boardInfo
         ) as BoardInfo[]
