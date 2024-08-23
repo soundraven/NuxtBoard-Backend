@@ -4,6 +4,8 @@ import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
+import { convertArrayToCamelcase } from "../utils/convertToCamelcase"
+import dayjs from "dayjs"
 
 dotenv.config()
 
@@ -27,10 +29,23 @@ router.get("/:registeredBy", async (req: Request, res: Response) => {
             [registeredBy]
         )
 
+        const camelcaseCommentList = convertArrayToCamelcase(commentList)
+
+        const commentListWithFormattedDate = camelcaseCommentList.map(
+            (commentList) => {
+                return {
+                    ...commentList,
+                    formattedDate: dayjs(commentList.registeredDate).format(
+                        "YYYY-MM-DD HH:mm:ss"
+                    ),
+                }
+            }
+        )
+
         res.status(200).json({
             code: "S",
             message: "Successfully get list of comments",
-            commentList: commentList,
+            commentList: commentListWithFormattedDate,
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
