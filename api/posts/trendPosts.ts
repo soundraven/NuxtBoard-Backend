@@ -12,56 +12,116 @@ router.get("/", async (req: Request, res: Response) => {
     }
 
     try {
-        // 현재 날짜 기준으로 7일 전 날짜 계산
         const sevenDaysAgo = dayjs().subtract(7, "day").format("YYYY-MM-DD")
+        const { boardId } = req.query
+        console.log(boardId)
 
-        const [result] = await connection.execute<RowDataPacket[]>(
-            `
+        let getTrendPostsQuery = `
             SELECT 
-                post_id
+                p.id as post_id
             FROM 
-                like_info
-            WHERE 
-                registered_date >= ?
+                post p
+            JOIN 
+                like_info li ON p.id = li.post_id
+            WHERE
+                p.registered_date >= ?
             GROUP BY 
-                post_id
+                p.id
             ORDER BY 
-                SUM(liked) DESC
+                SUM(li.liked) DESC
             LIMIT 5
-            `,
+        `
+
+        const [trendPostsResult] = await connection.execute<RowDataPacket[]>(
+            getTrendPostsQuery,
             [sevenDaysAgo]
         )
 
-        console.log(result)
+        const trendPosts = trendPostsResult.map((row) => row.post_id)
+        const trendPostsDetails = []
 
-        const trendPosts = result.map((row) => row.post_id)
+        for (const postId of trendPosts) {
+            const [postDetailsResult] = await connection.execute<
+                RowDataPacket[]
+            >(
+                `
+                SELECT 
+                    id, title, registered_date
+                FROM 
+                    post
+                WHERE 
+                    id = ?
+                `,
+                [postId]
+            )
 
-        const [postDetailsResult] = await connection.execute<RowDataPacket[]>(
-            `
+            if (postDetailsResult.length > 0) {
+                const postDetail = postDetailsResult[0]
+                trendPostsDetails.push({
+                    id: postDetail.id,
+                    title: postDetail.title,
+                    registeredDate: postDetail.registered_date,
+                })
+            }
+        }
+
+        let currentBoardTrendQuery = `
             SELECT 
-                *
+                post.id
             FROM 
                 post
-            WHERE 
-                id IN (?)
-            `,
-            [trendPosts]
-        )
-        console.log(trendPosts)
-        console.log(postDetailsResult)
+            JOIN 
+                like_info ON post.id = like_info.post_id
+            WHERE
+                post.registered_date >= ? AND post.board_id = ?
+            GROUP BY 
+                post.id
+            ORDER BY 
+                SUM(like_info.liked) DESC
+            LIMIT 5
+        `
 
-        const trendPostsDetails = postDetailsResult.map((row) => ({
-            id: row.id,
-            title: row.title,
-            registeredDate: row.registered_date,
-        }))
+        let currentBoardTrendDetails = []
+        if (boardId) {
+            const [currentBoardTrendResult] = await connection.execute<
+                RowDataPacket[]
+            >(currentBoardTrendQuery, [sevenDaysAgo, boardId])
 
-        console.log(trendPostsDetails)
+            const currentBoardTrendPosts = currentBoardTrendResult.map(
+                (row) => row.id
+            )
+
+            for (const postId of currentBoardTrendPosts) {
+                const [postDetailsResult] = await connection.execute<
+                    RowDataPacket[]
+                >(
+                    `
+                    SELECT
+                        id, title, registered_date
+                    FROM
+                        post
+                    WHERE
+                        id = ?
+                    `,
+                    [postId]
+                )
+
+                if (postDetailsResult.length > 0) {
+                    const postDetail = postDetailsResult[0]
+                    currentBoardTrendDetails.push({
+                        id: postDetail.id,
+                        title: postDetail.title,
+                        registeredDate: postDetail.registered_date,
+                    })
+                }
+            }
+        }
 
         res.status(200).json({
             code: "S",
             message: "Successfully fetched top liked posts",
             trendPosts: trendPostsDetails,
+            currentBoardTrendPosts: currentBoardTrendDetails,
         })
     } catch (error) {
         errorHandler(res, error)

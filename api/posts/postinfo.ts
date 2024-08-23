@@ -1,10 +1,14 @@
 import express, { Request, Response } from "express"
-import { ApiResponse } from "../structure/interface"
+import { ApiResponse, PostInfo } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
-import { convertToCamelcase } from "../utils/convertToCamelcase"
+import {
+    convertArrayToCamelcase,
+    convertToCamelcase,
+} from "../utils/convertToCamelcase"
+import dayjs from "dayjs"
 
 dotenv.config()
 
@@ -22,12 +26,14 @@ router.get("/:id", async (req: Request, res: Response) => {
             connection.execute<RowDataPacket[]>(
                 `SELECT 
                     post.*,
-                    board_info.board_id AS board_info_board_id,
-                    board_info.board_name
+                    board_info.board_name,
+                    user_info.user_name AS registered_by_user_name
                 FROM 
                     post
                 LEFT JOIN 
                     board_info ON post.board_id = board_info.board_id
+                LEFT JOIN
+                    user_info ON post.registered_by = user_info.id
                 WHERE
                     post.id = ?`,
                 [postId]
@@ -43,8 +49,20 @@ router.get("/:id", async (req: Request, res: Response) => {
             ),
         ])
 
-        const camelcasePostInfo = convertToCamelcase(postInfo[0][0])
+        const postInfoWithFormattedDate = postInfo[0].map((postInfo) => {
+            return {
+                ...postInfo,
+                formatted_date: dayjs(postInfo.registered_date).format(
+                    "YYYY-MM-DD HH:mm:ss"
+                ),
+            }
+        })
+
+        const [camelcasePostInfo] = convertArrayToCamelcase(
+            postInfoWithFormattedDate
+        )
         const camelcaseLikeInfo = convertToCamelcase(likeInfo[0][0])
+        console.log(camelcasePostInfo)
 
         res.status(200).json({
             code: "S",

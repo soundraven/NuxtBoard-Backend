@@ -39,7 +39,7 @@ interface PostInfo {
     content: string
     formattedDate?: Dayjs
     boardName: string
-    registeredUserName: string
+    registeredByUserName: string
 }
 
 interface GroupedPost {
