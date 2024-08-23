@@ -8,6 +8,7 @@ import {
     convertArrayToCamelcase,
     convertToCamelcase,
 } from "../utils/convertToCamelcase"
+import dayjs from "dayjs"
 
 dotenv.config()
 
@@ -51,16 +52,37 @@ router.get("/:id", async (req: Request, res: Response) => {
         const commentList = convertArrayToCamelcase<CommentInfo>(
             commentListResult[0] as CommentInfo[]
         )
+
+        const commentInfoWithFormattedDate = commentList.map((commentInfo) => {
+            return {
+                ...commentInfo,
+                formattedDate: dayjs(commentInfo.registeredDate).format(
+                    "YYYY-MM-DD HH:mm:ss"
+                ),
+            }
+        })
+
         const replyList = convertArrayToCamelcase<ReplyInfo>(
             replyListResult[0] as ReplyInfo[]
         )
 
-        const mappedCommentList = commentList.map((comment) => ({
-            ...comment,
-            replies: replyList.filter(
-                (reply) => reply.commentId === comment.id
-            ),
-        }))
+        const replyListWithFormattedDate = replyList.map((replyList) => {
+            return {
+                ...replyList,
+                formattedDate: dayjs(replyList.registeredDate).format(
+                    "YYYY-MM-DD HH:mm:ss"
+                ),
+            }
+        })
+
+        const mappedCommentList = commentInfoWithFormattedDate.map(
+            (comment) => ({
+                ...comment,
+                replies: replyListWithFormattedDate.filter(
+                    (reply) => reply.commentId === comment.id
+                ),
+            })
+        )
 
         res.status(200).json({
             code: "S",
