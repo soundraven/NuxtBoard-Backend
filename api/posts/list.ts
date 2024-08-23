@@ -88,6 +88,17 @@ router.get("/", async (req: Request, res: Response) => {
             postListResult as PostInfo[]
         )
 
+        const postListWithFormattedDate = postList.map((post) => {
+            const formattedDate = dayjs(post.registeredDate).format(
+                "YYYY-MM-DD HH:mm:ss"
+            )
+
+            return {
+                ...post,
+                formattedDate,
+            }
+        })
+
         const groupedPost: GroupedPost = postList.reduce((acc, post) => {
             const key = post.boardId
             if (!acc[key]) {
@@ -112,7 +123,7 @@ router.get("/", async (req: Request, res: Response) => {
         res.status(200).json({
             code: "S",
             message: "Successfully get list of posts",
-            postList: postList,
+            postList: postListWithFormattedDate,
             totalCount: totalCount,
             groupedPost: groupedPost,
         } as ApiResponse)

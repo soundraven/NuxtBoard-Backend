@@ -99,7 +99,7 @@ router.post("/dislike", async (req: Request, res: Response) => {
 
         res.status(200).json({
             code: "S",
-            message: "Successfully liked.",
+            message: "Successfully disliked.",
         } as ApiResponse)
     } catch (error) {
         errorHandler(res, error)
