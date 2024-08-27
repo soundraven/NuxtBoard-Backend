@@ -1,11 +1,7 @@
-interface ApiResponse {
-    code: "S" | "E" | "F"
+interface GeneralServerResponse<T = undefined> {
+    success: boolean
     message: string
-    errorCode?: string
-    user?: UserInfo
-    token?: string
-    postList?: PostInfo[]
-    totalCount?: number
+    data?: T
 }
 
 interface NewUser {
@@ -37,7 +33,7 @@ interface PostInfo {
     registeredDate: number
     title: string
     content: string
-    formattedDate?: Dayjs
+    formattedDate: Dayjs
     boardName: string
     registeredByUserName: string
 }
@@ -66,9 +62,14 @@ interface ReplyInfo {
     formattedDate?: Dayjs
 }
 
+interface LikeInfo {
+    totalLikes: number
+    totalDislikes: number
+}
+
 export type {
     UserInfo,
-    ApiResponse,
+    GeneralServerResponse,
     NewUser,
     LoginUserInfo,
     PostInfo,
@@ -76,4 +77,5 @@ export type {
     CommentInfo,
     ReplyInfo,
     BoardInfo,
+    LikeInfo,
 }

@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { ApiResponse, GroupedPost, PostInfo } from "../structure/interface"
+import { GroupedPost, PostInfo } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -13,7 +13,7 @@ const router = express.Router()
 
 router.get("/", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
@@ -21,7 +21,7 @@ router.get("/", async (req: Request, res: Response) => {
             currentPage: string
             pageSize: string
             registeredBy: string
-            boardId: string
+            boardId: string | undefined
         }
 
         const currentPageNum = parseInt(currentPage) - 1 // 프론트에서 현재 페이지 1 기준 시작
@@ -112,7 +112,7 @@ router.get("/", async (req: Request, res: Response) => {
             const numberKey = Number(key)
             groupedPost[numberKey] = groupedPost[numberKey].map((item) => ({
                 ...item,
-                formatted_date: dayjs(item.registeredDate).format(
+                formattedDate: dayjs(item.registeredDate).format(
                     "YYYY-MM-DD HH:mm:ss"
                 ),
             }))
@@ -123,12 +123,14 @@ router.get("/", async (req: Request, res: Response) => {
         res.status(200).json({
             code: "S",
             message: "Successfully get list of posts",
-            postList: postListWithFormattedDate,
-            totalCount: totalCount,
-            groupedPost: groupedPost,
-        } as ApiResponse)
+            data: {
+                postList: postListWithFormattedDate,
+                totalCount: totalCount,
+                groupedPost: groupedPost,
+            },
+        })
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

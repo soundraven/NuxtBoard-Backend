@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { ApiResponse } from "../structure/interface"
+import { GeneralServerResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { ResultSetHeader } from "mysql2"
@@ -8,16 +8,12 @@ const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
         if (res.locals.validatedUser.user.id !== req.body.user.id) {
-            res.status(200).json({
-                code: "E",
-                errorCode: "006",
-                message: "validation failed",
-            })
+            return errorHandler(res, "Validation failed", 401)
         }
 
         const postInfo = req.body.post
@@ -31,20 +27,19 @@ router.post("/", async (req: Request, res: Response) => {
         )
 
         if (result[0].affectedRows < 1) {
-            return res.status(200).json({
-                code: "E",
-                message: "Failed to post",
-            } as ApiResponse)
+            errorHandler(res, "Failed to post.", 500)
         }
 
         console.log(result[0].insertId)
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully posted",
-            postId: result[0].insertId,
-        } as ApiResponse)
+            data: {
+                postId: result[0].insertId,
+            },
+        } as GeneralServerResponse<{ postId: number }>)
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

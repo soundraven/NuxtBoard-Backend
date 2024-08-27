@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { UserInfo, ApiResponse, NewUser } from "../structure/interface"
+import { NewUser } from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
@@ -12,47 +12,41 @@ const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
-        const NewUser: NewUser = req.body.user
+        const newUser: NewUser = req.body.user
 
-        if (!NewUser.email || !NewUser.password) {
-            return res.status(400).json({
-                code: "F",
-                message: "UserInfo not exist",
-            } as ApiResponse)
+        if (!newUser.email || !newUser.password) {
+            return errorHandler(res, "UserInfo not exist", 400)
         }
 
         const encryptedPassword: string = crypto
             .createHash("sha256")
-            .update(NewUser.password + process.env.PWSALT)
+            .update(newUser.password + process.env.PWSALT)
             .digest("hex")
 
         const [result] = await connection.execute<RowDataPacket[]>(
             `SELECT COUNT(email) AS count FROM user_info WHERE email = ?`,
-            [NewUser.email]
+            [newUser.email]
         )
 
         if (result[0].count > 0) {
-            return res.status(409).json({
-                code: "E",
-                message: "Email already exist.",
-            } as ApiResponse)
+            return errorHandler(res, "Email already exist.", 409)
         }
 
         await connection.execute(
             `INSERT INTO user_info (email, password, user_name) VALUES (?, ?, ?)`,
-            [NewUser.email, encryptedPassword, NewUser.userName]
+            [newUser.email, encryptedPassword, newUser.userName]
         )
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Registration success.",
-        } as ApiResponse)
+        })
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

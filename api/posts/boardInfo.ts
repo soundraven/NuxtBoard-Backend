@@ -2,7 +2,7 @@ import express from "express"
 import { connection } from "../index"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { ApiResponse, BoardInfo } from "../structure/interface"
+import { BoardInfo } from "../structure/interface"
 import { RowDataPacket } from "mysql2"
 import { convertArrayToCamelcase } from "../utils/convertToCamelcase"
 
@@ -11,7 +11,7 @@ const router = express.Router()
 
 router.get("/", async (req, res) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
@@ -26,9 +26,9 @@ router.get("/", async (req, res) => {
             code: "S",
             message: "Successfully get list of boards",
             boardInfo: camelcaseBoardInfo,
-        } as ApiResponse)
+        })
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

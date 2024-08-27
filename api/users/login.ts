@@ -1,5 +1,9 @@
 import express, { Request, Response } from "express"
-import { UserInfo, ApiResponse, LoginUserInfo } from "../structure/interface"
+import {
+    UserInfo,
+    GeneralServerResponse,
+    LoginUserInfo,
+} from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
@@ -18,17 +22,14 @@ const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
         const loginUser: LoginUserInfo = req.body.user
 
         if (!loginUser.email || !loginUser.password) {
-            return res.status(400).json({
-                code: "F",
-                message: "UserInfo not exist",
-            } as ApiResponse)
+            return errorHandler(res, "UserInfo not exist", 400)
         }
 
         const encryptedPassword: string = crypto
@@ -44,27 +45,18 @@ router.post("/", async (req: Request, res: Response) => {
         )
 
         if (!dbUserInfo) {
-            return res.status(401).json({
-                code: "E",
-                message: "User not exist",
-            } as ApiResponse)
+            return errorHandler(res, "User not exist", 401)
         }
 
         if (
             loginUser.email !== dbUserInfo[0].email ||
             encryptedPassword !== dbUserInfo[0].password
         ) {
-            return res.status(401).json({
-                code: "E",
-                message: "Email or Password not matched",
-            } as ApiResponse)
+            return errorHandler(res, "Email or Password not matched", 401)
         }
 
         if (dbUserInfo[0].active === 0) {
-            return res.status(410).json({
-                code: "E",
-                message: "Already resigned user",
-            } as ApiResponse)
+            return errorHandler(res, "Already resigned user", 410)
         }
 
         const { password, ...userWithoutPassword } = dbUserInfo[0]
@@ -82,14 +74,16 @@ router.post("/", async (req: Request, res: Response) => {
         )
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Login success",
-            user: user,
-            refreshToken: refreshToken,
-            accessToken: accessToken,
-        } as ApiResponse)
+            data: {
+                user: user,
+                refreshToken: refreshToken,
+                accessToken: accessToken,
+            },
+        } as GeneralServerResponse<{ user: UserInfo; refreshToken: string; accessToken: string }>)
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

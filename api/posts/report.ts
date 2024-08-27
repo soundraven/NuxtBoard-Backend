@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { ApiResponse } from "../structure/interface"
+import { GeneralServerResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
@@ -8,16 +8,12 @@ const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
         if (res.locals.validatedUser.user.id !== req.body.user.id) {
-            return res.status(200).json({
-                code: "E",
-                errorCode: "006",
-                message: "Validation failed.",
-            } as ApiResponse)
+            return errorHandler(res, "Validation failed.", 401)
         }
 
         const postId = req.body.postId
@@ -30,10 +26,7 @@ router.post("/", async (req: Request, res: Response) => {
         console.log(checkHistory)
 
         if (checkHistory.length > 0) {
-            return res.status(200).json({
-                code: "E",
-                message: "Already reported this post",
-            } as ApiResponse)
+            return errorHandler(res, "Already reported this post.", 409)
         }
 
         await Promise.all([
@@ -59,17 +52,17 @@ router.post("/", async (req: Request, res: Response) => {
             )
 
             return res.status(200).json({
-                code: "S",
+                success: true,
                 message: "Post successfully deleted by report",
-            } as ApiResponse)
+            } as GeneralServerResponse)
         }
 
         return res.status(200).json({
-            code: "S",
+            success: true,
             message: "Post successfully reported",
-        } as ApiResponse)
+        } as GeneralServerResponse)
     } catch (error) {
-        return errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

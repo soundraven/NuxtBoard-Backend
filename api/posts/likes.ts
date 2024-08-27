@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { ApiResponse } from "../structure/interface"
+import {} from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
@@ -8,7 +8,7 @@ const router = express.Router()
 
 router.post("/like", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
@@ -17,7 +17,7 @@ router.post("/like", async (req: Request, res: Response) => {
                 code: "E",
                 errorCode: "006",
                 message: "Validation failed.",
-            } as ApiResponse)
+            })
         }
 
         const postId = req.body.postId
@@ -33,7 +33,7 @@ router.post("/like", async (req: Request, res: Response) => {
                 return res.status(200).json({
                     code: "E",
                     message: "Already liked",
-                } as ApiResponse)
+                })
             }
 
             await connection.execute(
@@ -50,15 +50,15 @@ router.post("/like", async (req: Request, res: Response) => {
         res.status(200).json({
             code: "S",
             message: "Successfully liked.",
-        } as ApiResponse)
+        })
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 
 router.post("/dislike", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
@@ -67,7 +67,7 @@ router.post("/dislike", async (req: Request, res: Response) => {
                 code: "E",
                 errorCode: "006",
                 message: "Validation failed.",
-            } as ApiResponse)
+            })
         }
 
         const postId = req.body.postId
@@ -83,7 +83,7 @@ router.post("/dislike", async (req: Request, res: Response) => {
                 return res.status(200).json({
                     code: "E",
                     message: "Already disliked",
-                } as ApiResponse)
+                })
             }
 
             await connection.execute(
@@ -100,9 +100,9 @@ router.post("/dislike", async (req: Request, res: Response) => {
         res.status(200).json({
             code: "S",
             message: "Successfully disliked.",
-        } as ApiResponse)
+        })
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

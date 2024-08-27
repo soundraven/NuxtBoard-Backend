@@ -3,18 +3,18 @@ import { connection } from "../index"
 import { errorHandler } from "../utils/errorhandler"
 import { RowDataPacket } from "mysql2"
 import dayjs from "dayjs"
+import { GeneralServerResponse, PostInfo } from "../structure/interface"
 
 const router = express.Router()
 
 router.get("/", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
         const sevenDaysAgo = dayjs().subtract(7, "day").format("YYYY-MM-DD")
         const { boardId } = req.query
-        console.log(boardId)
 
         let getTrendPostsQuery = `
             SELECT 
@@ -118,13 +118,15 @@ router.get("/", async (req: Request, res: Response) => {
         }
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully fetched top liked posts",
-            trendPosts: trendPostsDetails,
-            currentBoardTrendPosts: currentBoardTrendDetails,
-        })
+            data: {
+                trendPosts: trendPostsDetails,
+                currentBoardTrendPosts: currentBoardTrendDetails,
+            },
+        } as GeneralServerResponse<{ trendPosts: PostInfo[]; currentBoardTrendPosts: PostInfo[] }>)
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

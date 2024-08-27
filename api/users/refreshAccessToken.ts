@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { UserInfo, ApiResponse } from "../structure/interface"
+import { UserInfo, GeneralServerResponse } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -14,17 +14,14 @@ const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
         const refreshToken: string = req.body.refreshToken
 
         if (!refreshToken) {
-            return res.status(401).json({
-                code: "F",
-                message: "Auth failed",
-            } as ApiResponse)
+            return errorHandler(res, "Auth failed", 401)
         }
 
         const decoded = jwt.verify(
@@ -41,10 +38,7 @@ router.post("/", async (req: Request, res: Response) => {
         )
 
         if (!dbUserInfo) {
-            return res.status(410).json({
-                code: "F",
-                message: "User not exist",
-            })
+            return errorHandler(res, "User not exist", 410)
         }
 
         const user = convertToCamelcase<UserInfo>(dbUserInfo[0])
@@ -52,12 +46,14 @@ router.post("/", async (req: Request, res: Response) => {
         const newAccessToken = generateToken(user, accessTokenExpires, "access")
 
         res.status(200).json({
-            code: "S",
+            success: false,
             message: "Successfully created new access tokens",
-            newAccessToken: newAccessToken,
-        } as ApiResponse)
+            data: {
+                newAccessToken: newAccessToken,
+            },
+        } as GeneralServerResponse<{ newAccessToken: string }>)
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

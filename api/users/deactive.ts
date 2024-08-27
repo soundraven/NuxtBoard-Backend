@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { ApiResponse } from "../structure/interface"
+import { GeneralServerResponse } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -11,16 +11,12 @@ const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
         if (!req.body || !req.body.user.id) {
-            return res.status(200).json({
-                code: "E",
-                errorCode: "001",
-                message: "UserInfo not exist",
-            } as ApiResponse)
+            return errorHandler(res, "UserInfo not exist", 400)
         }
 
         const validatedUser = res.locals.validatedUser
@@ -32,10 +28,7 @@ router.post("/", async (req: Request, res: Response) => {
             user.id !== validatedUser.user.id ||
             token !== validatedUser.token
         ) {
-            return res.status(200).json({
-                code: "E",
-                message: "User auth not matched",
-            } as ApiResponse)
+            return errorHandler(res, "User auth not matched", 400)
         }
 
         const [deactivate] = await connection.execute<ResultSetHeader>(
@@ -44,18 +37,15 @@ router.post("/", async (req: Request, res: Response) => {
         )
 
         if (deactivate.affectedRows === 0) {
-            return res.status(200).json({
-                code: "E",
-                message: "User not found",
-            } as ApiResponse)
+            return errorHandler(res, "User not found", 400)
         }
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Account successfully deactivated",
-        } as ApiResponse)
+        } as GeneralServerResponse)
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

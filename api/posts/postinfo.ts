@@ -1,5 +1,9 @@
 import express, { Request, Response } from "express"
-import { ApiResponse, PostInfo } from "../structure/interface"
+import {
+    GeneralServerResponse,
+    LikeInfo,
+    PostInfo,
+} from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -16,13 +20,13 @@ const router = express.Router()
 
 router.get("/:id", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     const postId = req.params.id
 
     try {
-        const [postInfo, likeInfo] = await Promise.all([
+        const [postInfoResult, likeInfoResult] = await Promise.all([
             connection.execute<RowDataPacket[]>(
                 `SELECT 
                     post.*,
@@ -49,29 +53,30 @@ router.get("/:id", async (req: Request, res: Response) => {
             ),
         ])
 
-        const postInfoWithFormattedDate = postInfo[0].map((postInfo) => {
-            return {
-                ...postInfo,
-                formatted_date: dayjs(postInfo.registered_date).format(
-                    "YYYY-MM-DD HH:mm:ss"
-                ),
-            }
-        })
+        const tempPostInfo = convertToCamelcase(
+            postInfoResult[0]
+        ) as unknown as PostInfo
+        const tempLikeInfo = likeInfoResult[0][0] as unknown as LikeInfo
 
-        const [camelcasePostInfo] = convertArrayToCamelcase(
-            postInfoWithFormattedDate
-        )
-        const camelcaseLikeInfo = convertToCamelcase(likeInfo[0][0])
-        console.log(camelcasePostInfo)
+        const postInfo: PostInfo = {
+            ...convertToCamelcase(tempPostInfo),
+            formattedDate: dayjs(tempPostInfo.registeredDate).format(
+                "YYYY-MM-DD HH:mm:ss"
+            ),
+        }
+
+        const camelcaseLikeInfo: LikeInfo = convertToCamelcase(tempLikeInfo)
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully get list of posts",
-            postInfo: camelcasePostInfo,
-            likeInfo: camelcaseLikeInfo,
-        } as ApiResponse)
+            data: {
+                postInfo: postInfo,
+                likeInfo: camelcaseLikeInfo,
+            },
+        } as GeneralServerResponse<{ postInfo: PostInfo; likeInfo: LikeInfo }>)
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { ApiResponse } from "../structure/interface"
+import { GeneralServerResponse } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -11,14 +11,11 @@ const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     if (res.locals.validatedUser.user.id !== req.body.user.id) {
-        return res.status(200).json({
-            code: "E",
-            message: "Validation failed.",
-        } as ApiResponse)
+        return errorHandler(res, "Validation failed.", 401)
     }
 
     try {
@@ -30,11 +27,11 @@ router.post("/", async (req: Request, res: Response) => {
         )
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "UserName set success.",
-        } as ApiResponse)
+        } as GeneralServerResponse)
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express"
-import { UserInfo, ApiResponse } from "../structure/interface"
+import { UserInfo } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
@@ -19,7 +19,7 @@ export default async function validateToken(
     next: NextFunction
 ) {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     console.log("middlewares")
@@ -30,7 +30,7 @@ export default async function validateToken(
         return res.status(401).json({
             code: "F",
             message: "Auth failed",
-        } as ApiResponse)
+        })
     }
 
     console.log("middlewares2")
@@ -49,17 +49,11 @@ export default async function validateToken(
         console.log(user)
 
         if (user.length < 1) {
-            return res.status(404).json({
-                code: "F",
-                message: "User not exist",
-            } as ApiResponse)
+            return errorHandler(res, "User not exist", 404)
         }
 
         if (user[0].active === 0) {
-            return res.status(410).json({
-                code: "F",
-                message: "Already resigned user",
-            } as ApiResponse)
+            return errorHandler(res, "Already resigned user", 410)
         }
 
         const camelcaseUser = convertToCamelcase<UserInfo>(user[0])
@@ -67,6 +61,6 @@ export default async function validateToken(
         res.locals.validatedUser = { user: camelcaseUser, token: token }
         next()
     } catch (error) {
-        errorHandler(res, error as Error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 }

@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { ApiResponse, CommentInfo, ReplyInfo } from "../structure/interface"
+import { CommentInfo, ReplyInfo } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -16,7 +16,7 @@ const router = express.Router()
 
 router.get("/:id", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     try {
@@ -88,9 +88,9 @@ router.get("/:id", async (req: Request, res: Response) => {
             code: "S",
             message: "Successfully get list of comments",
             commentList: mappedCommentList,
-        } as ApiResponse)
+        })
     } catch (error) {
-        return errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 

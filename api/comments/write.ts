@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { ApiResponse } from "../structure/interface"
+import {} from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { ResultSetHeader } from "mysql2"
@@ -8,7 +8,7 @@ const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
     if (!connection) {
-        return errorHandler(res, new Error("Database connection not available"))
+        return errorHandler(res, "Database connection not available")
     }
 
     const { postId, comment, reply, commentId } = req.body
@@ -27,15 +27,15 @@ router.post("/", async (req: Request, res: Response) => {
                 return res.status(200).json({
                     code: "F",
                     message: "Failed to post",
-                } as ApiResponse)
+                })
             }
 
             return res.status(200).json({
                 code: "S",
                 message: "Successfully posted",
-            } as ApiResponse)
+            })
         } catch (error) {
-            errorHandler(res, error)
+            errorHandler(res, "An unexpected error occurred.")
         }
     }
 
@@ -51,15 +51,15 @@ router.post("/", async (req: Request, res: Response) => {
             return res.status(200).json({
                 code: "F",
                 message: "Failed to post",
-            } as ApiResponse)
+            })
         }
 
         res.status(200).json({
             code: "S",
             message: "Successfully posted",
-        } as ApiResponse)
+        })
     } catch (error) {
-        errorHandler(res, error)
+        errorHandler(res, "An unexpected error occurred.")
     }
 })
 
