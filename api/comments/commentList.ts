@@ -1,5 +1,9 @@
 import express, { Request, Response } from "express"
-import { CommentInfo, ReplyInfo } from "../structure/interface"
+import {
+    CommentInfo,
+    GeneralServerResponse,
+    ReplyInfo,
+} from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -21,6 +25,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     try {
         const postId = req.params.id
+        console.log(postId)
 
         const [commentListResult, replyListResult] = await Promise.all([
             connection.execute<CommentInfo[] & RowDataPacket[]>(
@@ -84,11 +89,15 @@ router.get("/:id", async (req: Request, res: Response) => {
             })
         )
 
+        console.log(mappedCommentList)
+
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully get list of comments",
-            commentList: mappedCommentList,
-        })
+            data: {
+                commentList: mappedCommentList,
+            },
+        } as GeneralServerResponse<{ commentList: CommentInfo[] }>)
     } catch (error) {
         errorHandler(res, "An unexpected error occurred.")
     }

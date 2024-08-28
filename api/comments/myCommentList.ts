@@ -18,7 +18,6 @@ router.get("/:registeredBy", async (req: Request, res: Response) => {
 
     try {
         const registeredBy = req.params.registeredBy
-        console.log(registeredBy)
 
         const [commentList] = await connection.execute<RowDataPacket[]>(
             `SELECT 

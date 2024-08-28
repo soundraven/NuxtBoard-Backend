@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import {} from "../structure/interface"
+import { GeneralServerResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 
@@ -20,9 +20,9 @@ router.post("/", async (req: Request, res: Response) => {
             )
 
             return res.status(200).json({
-                code: "S",
+                success: true,
                 message: "Successfully edited",
-            })
+            } as GeneralServerResponse)
         } catch (error) {
             errorHandler(res, "An unexpected error occurred.")
         }
@@ -35,7 +35,7 @@ router.post("/", async (req: Request, res: Response) => {
         ])
 
         return res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully edited",
         })
     } catch (error) {
