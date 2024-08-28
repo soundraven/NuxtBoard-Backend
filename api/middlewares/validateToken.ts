@@ -25,6 +25,7 @@ export default async function validateToken(
     console.log("middlewares")
 
     const token = req.headers["authorization"]?.split(" ")[1] || ""
+    console.log(token)
 
     if (!token) {
         return res.status(401).json({
@@ -36,17 +37,19 @@ export default async function validateToken(
     console.log("middlewares2")
 
     try {
+        console.log("시작")
         const decoded = jwt.verify(
             token,
             process.env.JWT_SECRET as string
         ) as jwt.JwtPayload
+
         const userId = decoded.id
         console.log("validateUserId:", userId)
+
         const [user] = await connection.execute<UserInfo[] & RowDataPacket[]>(
             `SELECT id, email, user_name, registered_date, active FROM user_info WHERE id = ?`,
             [userId]
         )
-        console.log(user)
 
         if (user.length < 1) {
             return errorHandler(res, "User not exist", 404)

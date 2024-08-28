@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import {} from "../structure/interface"
+import { CommentInfo, GeneralServerResponse } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -18,18 +18,21 @@ router.get("/:registeredBy", async (req: Request, res: Response) => {
 
     try {
         const registeredBy = req.params.registeredBy
+        console.log(registeredBy)
 
         const [commentList] = await connection.execute<RowDataPacket[]>(
             `SELECT 
-            comment.*
-        FROM 
-            comment
-        WHERE
-            registered_by = ?`,
+                comment.*
+            FROM 
+                comment
+            WHERE
+                registered_by = ?`,
             [registeredBy]
         )
 
-        const camelcaseCommentList = convertArrayToCamelcase(commentList)
+        const camelcaseCommentList = convertArrayToCamelcase(
+            commentList
+        ) as CommentInfo[]
 
         const commentListWithFormattedDate = camelcaseCommentList.map(
             (commentList) => {
@@ -43,10 +46,10 @@ router.get("/:registeredBy", async (req: Request, res: Response) => {
         )
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully get list of comments",
-            data: commentListWithFormattedDate,
-        })
+            data: { commentList: commentListWithFormattedDate },
+        } as GeneralServerResponse<{ commentList: CommentInfo[] }>)
     } catch (error) {
         errorHandler(res, "An unexpected error occurred.")
     }

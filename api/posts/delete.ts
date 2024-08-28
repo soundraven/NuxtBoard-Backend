@@ -11,11 +11,7 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     if (res.locals.validatedUser.user.id !== req.body.user.id) {
-        return res.status(200).json({
-            code: "E",
-            errorCode: "006",
-            message: "Validation failed.",
-        })
+        return errorHandler(res, "Validation failed", 401)
     }
 
     const postId = req.body.postId
@@ -26,7 +22,7 @@ router.post("/", async (req: Request, res: Response) => {
         ])
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Post successfully edited",
         })
     } catch (error) {

@@ -1,5 +1,9 @@
 import express, { Request, Response } from "express"
-import { GroupedPost, PostInfo } from "../structure/interface"
+import {
+    GeneralServerResponse,
+    GroupedPost,
+    PostInfo,
+} from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
@@ -121,14 +125,14 @@ router.get("/", async (req: Request, res: Response) => {
         const totalCount = countResult[0].totalPosts
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully get list of posts",
             data: {
                 postList: postListWithFormattedDate,
                 totalCount: totalCount,
                 groupedPost: groupedPost,
             },
-        })
+        } as GeneralServerResponse<{ postList: PostInfo[]; totalCount: number; groupedPost: GroupedPost }>)
     } catch (error) {
         errorHandler(res, "An unexpected error occurred.")
     }

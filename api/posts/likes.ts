@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import {} from "../structure/interface"
+import { GeneralServerResponse, LikedHistory } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
@@ -13,44 +13,35 @@ router.post("/like", async (req: Request, res: Response) => {
 
     try {
         if (res.locals.validatedUser.user.id !== req.body.user.id) {
-            return res.status(200).json({
-                code: "E",
-                errorCode: "006",
-                message: "Validation failed.",
-            })
+            return errorHandler(res, "Validation failed", 401)
         }
 
         const postId = req.body.postId
         const userId = res.locals.validatedUser.user.id
 
-        const [likedHistory] = await connection.execute<RowDataPacket[]>(
+        const [likedHistoryResult] = await connection.execute<RowDataPacket[]>(
             `SELECT liked, disliked FROM like_info WHERE post_id = ? AND registered_by = ?`,
             [postId, userId]
         )
 
-        if (likedHistory.length > 0) {
-            if (likedHistory[0].liked === 1) {
-                return res.status(200).json({
-                    code: "E",
-                    message: "Already liked",
-                })
-            }
+        const likedHistory = likedHistoryResult[0] as LikedHistory | undefined
 
+        if (likedHistory) {
             await connection.execute(
-                `UPDATE like_info SET liked = ?, disliked = ? WHERE post_id = ? AND registered_by = ?`,
-                [1, likedHistory[0].disliked, postId, userId]
-            )
-        } else {
-            await connection.execute(
-                `INSERT INTO like_info (post_id, registered_by, liked) VALUES (?, ?, ?)`,
-                [postId, userId, 1]
+                `UPDATE like_info SET liked = ?, WHERE post_id = ? AND registered_by = ?`,
+                [1, postId, userId]
             )
         }
 
+        await connection.execute(
+            `INSERT INTO like_info (post_id, registered_by, liked) VALUES (?, ?, ?)`,
+            [postId, userId, 1]
+        )
+
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully liked.",
-        })
+        } as GeneralServerResponse)
     } catch (error) {
         errorHandler(res, "An unexpected error occurred.")
     }
@@ -63,44 +54,39 @@ router.post("/dislike", async (req: Request, res: Response) => {
 
     try {
         if (res.locals.validatedUser.user.id !== req.body.user.id) {
-            return res.status(200).json({
-                code: "E",
-                errorCode: "006",
-                message: "Validation failed.",
-            })
+            return errorHandler(res, "Validation failed", 401)
         }
 
         const postId = req.body.postId
         const userId = res.locals.validatedUser.user.id
 
-        const [likedHistory] = await connection.execute<RowDataPacket[]>(
+        const [likedHistoryResult] = await connection.execute<RowDataPacket[]>(
             `SELECT liked, disliked FROM like_info WHERE post_id = ? AND registered_by = ?`,
             [postId, userId]
         )
 
-        if (likedHistory.length > 0) {
-            if (likedHistory[0].disliked === 1) {
-                return res.status(200).json({
-                    code: "E",
-                    message: "Already disliked",
-                })
-            }
+        const likedHistory = likedHistoryResult[0] as LikedHistory | undefined
 
+        if (likedHistory && likedHistory.disliked === 1) {
+            return errorHandler(res, "Already disliked", 409)
+        }
+
+        if (likedHistory) {
             await connection.execute(
-                `UPDATE like_info SET liked = ?, disliked = ? WHERE post_id = ? AND registered_by = ?`,
-                [likedHistory[0].liked, 1, postId, userId]
-            )
-        } else {
-            await connection.execute(
-                `INSERT INTO like_info (post_id, registered_by, disliked) VALUES (?, ?, ?)`,
-                [postId, userId, 1]
+                `UPDATE like_info SET disliked = ? WHERE post_id = ? AND registered_by = ?`,
+                [1, postId, userId]
             )
         }
 
+        await connection.execute(
+            `INSERT INTO like_info (post_id, registered_by, disliked) VALUES (?, ?, ?)`,
+            [postId, userId, 1]
+        )
+
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully disliked.",
-        })
+        } as GeneralServerResponse)
     } catch (error) {
         errorHandler(res, "An unexpected error occurred.")
     }

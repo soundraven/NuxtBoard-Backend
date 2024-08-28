@@ -53,26 +53,23 @@ router.get("/:id", async (req: Request, res: Response) => {
             ),
         ])
 
-        const tempPostInfo = convertToCamelcase(
-            postInfoResult[0]
-        ) as unknown as PostInfo
-        const tempLikeInfo = likeInfoResult[0][0] as unknown as LikeInfo
+        const postInfo = convertToCamelcase(postInfoResult[0][0]) as PostInfo
 
-        const postInfo: PostInfo = {
-            ...convertToCamelcase(tempPostInfo),
-            formattedDate: dayjs(tempPostInfo.registeredDate).format(
+        const postInfoWithFormattedDate: PostInfo = {
+            ...postInfo,
+            formattedDate: dayjs(postInfo.registeredDate).format(
                 "YYYY-MM-DD HH:mm:ss"
             ),
         }
 
-        const camelcaseLikeInfo: LikeInfo = convertToCamelcase(tempLikeInfo)
+        const likeInfo = convertToCamelcase(likeInfoResult[0][0]) as LikeInfo
 
         res.status(200).json({
             success: true,
             message: "Successfully get list of posts",
             data: {
-                postInfo: postInfo,
-                likeInfo: camelcaseLikeInfo,
+                postInfo: postInfoWithFormattedDate,
+                likeInfo: likeInfo,
             },
         } as GeneralServerResponse<{ postInfo: PostInfo; likeInfo: LikeInfo }>)
     } catch (error) {

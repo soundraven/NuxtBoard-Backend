@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import {} from "../structure/interface"
+import { GeneralServerResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { ResultSetHeader } from "mysql2"
@@ -24,16 +24,13 @@ router.post("/", async (req: Request, res: Response) => {
             )
 
             if (result[0].affectedRows < 1) {
-                return res.status(200).json({
-                    code: "F",
-                    message: "Failed to post",
-                })
+                errorHandler(res, "Failed to post.", 500)
             }
 
             return res.status(200).json({
-                code: "S",
+                success: true,
                 message: "Successfully posted",
-            })
+            } as GeneralServerResponse)
         } catch (error) {
             errorHandler(res, "An unexpected error occurred.")
         }
@@ -48,16 +45,13 @@ router.post("/", async (req: Request, res: Response) => {
         )
 
         if (result[0].affectedRows < 1) {
-            return res.status(200).json({
-                code: "F",
-                message: "Failed to post",
-            })
+            errorHandler(res, "Failed to post.", 500)
         }
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully posted",
-        })
+        } as GeneralServerResponse)
     } catch (error) {
         errorHandler(res, "An unexpected error occurred.")
     }

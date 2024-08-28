@@ -67,6 +67,11 @@ interface LikeInfo {
     totalDislikes: number
 }
 
+interface LikedHistory {
+    liked: number
+    disliked: number
+}
+
 export type {
     UserInfo,
     GeneralServerResponse,
@@ -78,4 +83,5 @@ export type {
     ReplyInfo,
     BoardInfo,
     LikeInfo,
+    LikedHistory,
 }

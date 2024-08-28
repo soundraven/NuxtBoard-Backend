@@ -2,7 +2,7 @@ import express from "express"
 import { connection } from "../index"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { BoardInfo } from "../structure/interface"
+import { BoardInfo, GeneralServerResponse } from "../structure/interface"
 import { RowDataPacket } from "mysql2"
 import { convertArrayToCamelcase } from "../utils/convertToCamelcase"
 
@@ -15,18 +15,19 @@ router.get("/", async (req, res) => {
     }
 
     try {
-        const [boardInfo] = await connection.execute<
+        const [boardInfoResult] = await connection.execute<
             BoardInfo[] & RowDataPacket[]
         >("SELECT board_id, board_name FROM board_info WHERE active = 1")
-        const camelcaseBoardInfo = convertArrayToCamelcase(
-            boardInfo
-        ) as BoardInfo[]
+
+        const boardInfo = convertArrayToCamelcase(boardInfoResult)
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully get list of boards",
-            boardInfo: camelcaseBoardInfo,
-        })
+            data: {
+                boardInfo: boardInfo,
+            },
+        } as GeneralServerResponse<{ boardInfo: BoardInfo[] }>)
     } catch (error) {
         errorHandler(res, "An unexpected error occurred.")
     }

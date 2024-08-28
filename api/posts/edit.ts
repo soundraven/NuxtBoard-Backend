@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import {} from "../structure/interface"
+import { GeneralServerResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 
@@ -11,10 +11,7 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     if (res.locals.validatedUser.user.id !== req.body.user.id) {
-        return res.status(200).json({
-            code: "E",
-            message: "Validation failed.",
-        })
+        return errorHandler(res, "Validation failed", 401)
     }
 
     const postInfo = req.body.post
@@ -26,9 +23,9 @@ router.post("/", async (req: Request, res: Response) => {
         )
 
         res.status(200).json({
-            code: "S",
+            success: true,
             message: "Successfully edited",
-        })
+        } as GeneralServerResponse)
     } catch (error) {
         errorHandler(res, "An unexpected error occurred.")
     }

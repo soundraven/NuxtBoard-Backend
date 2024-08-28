@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { NewUser } from "../structure/interface"
+import { GeneralServerResponse, NewUser } from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
@@ -44,7 +44,7 @@ router.post("/", async (req: Request, res: Response) => {
         res.status(200).json({
             success: true,
             message: "Registration success.",
-        })
+        } as GeneralServerResponse)
     } catch (error) {
         errorHandler(res, "An unexpected error occurred.")
     }
