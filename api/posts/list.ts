@@ -134,7 +134,7 @@ router.get("/", async (req: Request, res: Response) => {
             },
         } as GeneralServerResponse<{ postList: PostInfo[]; totalCount: number; groupedPost: GroupedPost }>)
     } catch (error) {
-        errorHandler(res, "An unexpected error occurred.")
+        return errorHandler(res, "An unexpected error occurred.", 500, error)
     }
 })
 

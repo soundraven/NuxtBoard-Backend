@@ -26,9 +26,13 @@ router.post("/like", async (req: Request, res: Response) => {
 
         const likedHistory = likedHistoryResult[0] as LikedHistory | undefined
 
+        if (likedHistory && likedHistory.liked === 1) {
+            return errorHandler(res, "Already disliked", 409)
+        }
+
         if (likedHistory) {
             await connection.execute(
-                `UPDATE like_info SET liked = ?, WHERE post_id = ? AND registered_by = ?`,
+                `UPDATE like_info SET liked = ? WHERE post_id = ? AND registered_by = ?`,
                 [1, postId, userId]
             )
         }
@@ -43,7 +47,7 @@ router.post("/like", async (req: Request, res: Response) => {
             message: "Successfully liked.",
         } as GeneralServerResponse)
     } catch (error) {
-        errorHandler(res, "An unexpected error occurred.")
+        return errorHandler(res, "An unexpected error occurred.", 500, error)
     }
 })
 
@@ -88,7 +92,7 @@ router.post("/dislike", async (req: Request, res: Response) => {
             message: "Successfully disliked.",
         } as GeneralServerResponse)
     } catch (error) {
-        errorHandler(res, "An unexpected error occurred.")
+        return errorHandler(res, "An unexpected error occurred.", 500, error)
     }
 })
 

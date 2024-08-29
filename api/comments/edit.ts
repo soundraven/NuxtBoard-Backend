@@ -39,7 +39,7 @@ router.post("/", async (req: Request, res: Response) => {
             message: "Successfully edited",
         })
     } catch (error) {
-        errorHandler(res, "An unexpected error occurred.")
+        return errorHandler(res, "An unexpected error occurred.", 500, error)
     }
 })
 

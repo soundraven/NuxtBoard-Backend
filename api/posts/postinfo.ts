@@ -73,7 +73,7 @@ router.get("/:id", async (req: Request, res: Response) => {
             },
         } as GeneralServerResponse<{ postInfo: PostInfo; likeInfo: LikeInfo }>)
     } catch (error) {
-        errorHandler(res, "An unexpected error occurred.")
+        return errorHandler(res, "An unexpected error occurred.", 500, error)
     }
 })
 

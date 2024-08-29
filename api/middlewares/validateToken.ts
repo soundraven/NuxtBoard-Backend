@@ -64,6 +64,6 @@ export default async function validateToken(
         res.locals.validatedUser = { user: camelcaseUser, token: token }
         next()
     } catch (error) {
-        errorHandler(res, "An unexpected error occurred.")
+        return errorHandler(res, "An unexpected error occurred.", 500, error)
     }
 }

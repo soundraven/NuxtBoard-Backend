@@ -50,7 +50,7 @@ router.get("/:registeredBy", async (req: Request, res: Response) => {
             data: { commentList: commentListWithFormattedDate },
         } as GeneralServerResponse<{ commentList: CommentInfo[] }>)
     } catch (error) {
-        errorHandler(res, "An unexpected error occurred.")
+        return errorHandler(res, "An unexpected error occurred.", 500, error)
     }
 })
 

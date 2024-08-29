@@ -29,7 +29,7 @@ router.get("/", async (req, res) => {
             },
         } as GeneralServerResponse<{ boardInfo: BoardInfo[] }>)
     } catch (error) {
-        errorHandler(res, "An unexpected error occurred.")
+        return errorHandler(res, "An unexpected error occurred.", 500, error)
     }
 })
 

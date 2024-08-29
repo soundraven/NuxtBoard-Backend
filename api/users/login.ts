@@ -83,7 +83,7 @@ router.post("/", async (req: Request, res: Response) => {
             },
         } as GeneralServerResponse<{ user: UserInfo; refreshToken: string; accessToken: string }>)
     } catch (error) {
-        errorHandler(res, "An unexpected error occurred.")
+        return errorHandler(res, "An unexpected error occurred.", 500, error)
     }
 })
 

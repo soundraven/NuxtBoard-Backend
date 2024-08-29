@@ -99,7 +99,7 @@ router.get("/:id", async (req: Request, res: Response) => {
             },
         } as GeneralServerResponse<{ commentList: CommentInfo[] }>)
     } catch (error) {
-        errorHandler(res, "An unexpected error occurred.")
+        return errorHandler(res, "An unexpected error occurred.", 500, error)
     }
 })
 
