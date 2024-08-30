@@ -8,10 +8,7 @@ import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
-import {
-    convertArrayToCamelcase,
-    convertToCamelcase,
-} from "../utils/convertToCamelcase"
+import { convertToCamelcase } from "../utils/convertToCamelcase"
 import dayjs from "dayjs"
 
 dotenv.config()
@@ -26,9 +23,10 @@ router.get("/:id", async (req: Request, res: Response) => {
     const postId = req.params.id
 
     try {
-        const [postInfoResult, likeInfoResult] = await Promise.all([
-            connection.execute<RowDataPacket[]>(
-                `SELECT 
+        const [postInfoResult, likeInfoResult, fileUrlsResult] =
+            await Promise.all([
+                connection.execute<RowDataPacket[]>(
+                    `SELECT 
                     post.*,
                     board_info.board_name,
                     user_info.user_name AS registered_by_user_name
@@ -40,18 +38,27 @@ router.get("/:id", async (req: Request, res: Response) => {
                     user_info ON post.registered_by = user_info.id
                 WHERE
                     post.id = ?`,
-                [postId]
-            ),
-            connection.execute<RowDataPacket[]>(
-                `SELECT 
+                    [postId]
+                ),
+                connection.execute<RowDataPacket[]>(
+                    `SELECT 
                     SUM(liked) AS total_likes, SUM(disliked) AS total_dislikes
                 FROM 
                     like_info 
                 WHERE 
                     post_id = ?`,
-                [postId]
-            ),
-        ])
+                    [postId]
+                ),
+                connection.execute<RowDataPacket[]>(
+                    `SELECT 
+                    file_url
+                FROM 
+                    post_file
+                WHERE 
+                    post_id = ? AND active = 1`,
+                    [postId]
+                ),
+            ])
 
         const postInfo = convertToCamelcase(postInfoResult[0][0]) as PostInfo
 
@@ -60,9 +67,15 @@ router.get("/:id", async (req: Request, res: Response) => {
             formattedDate: dayjs(postInfo.registeredDate).format(
                 "YYYY-MM-DD HH:mm:ss"
             ),
+            files: fileUrlsResult[0].map((row) => row.file_url), // 파일 URL을 배열로 추가
         }
-
+        console.log(fileUrlsResult)
         const likeInfo = convertToCamelcase(likeInfoResult[0][0]) as LikeInfo
+
+        if (likeInfo.totalLikes === null || likeInfo.totalDislikes === null) {
+            likeInfo.totalLikes = likeInfo.totalLikes ?? 0
+            likeInfo.totalDislikes = likeInfo.totalDislikes ?? 0
+        }
 
         res.status(200).json({
             success: true,

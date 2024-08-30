@@ -27,7 +27,7 @@ router.post("/like", async (req: Request, res: Response) => {
         const likedHistory = likedHistoryResult[0] as LikedHistory | undefined
 
         if (likedHistory && likedHistory.liked === 1) {
-            return errorHandler(res, "Already disliked", 409)
+            return errorHandler(res, "Already liked", 409)
         }
 
         if (likedHistory) {

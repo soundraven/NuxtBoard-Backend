@@ -36,6 +36,8 @@ interface PostInfo {
     formattedDate: Dayjs
     boardName: string
     registeredByUserName: string
+    active: number
+    files: string[]
 }
 
 interface GroupedPost {

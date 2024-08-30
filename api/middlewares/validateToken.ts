@@ -9,10 +9,6 @@ import { convertToCamelcase } from "../utils/convertToCamelcase"
 
 dotenv.config()
 
-// const selectToken = `SELECT *
-//         FROM user_auths
-//         WHERE token = ? AND expires > NOW()`
-
 export default async function validateToken(
     req: Request,
     res: Response,
@@ -28,10 +24,7 @@ export default async function validateToken(
     console.log(token)
 
     if (!token) {
-        return res.status(401).json({
-            code: "F",
-            message: "Auth failed",
-        })
+        return errorHandler(res, "Auth failed", 401)
     }
 
     console.log("middlewares2")

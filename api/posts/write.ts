@@ -30,12 +30,23 @@ router.post("/", async (req: Request, res: Response) => {
             errorHandler(res, "Failed to post.", 500)
         }
 
-        console.log(result[0].insertId)
+        const postId = result[0].insertId
+
+        if (postInfo.files && postInfo.files.length > 0) {
+            const fileInsertPromises = postInfo.files.map((fileUrl: string) => {
+                return connection!.execute(
+                    "INSERT INTO post_file (post_id, file_url) VALUES (?, ?)",
+                    [postId, fileUrl]
+                )
+            })
+            await Promise.all(fileInsertPromises)
+        }
+
         res.status(200).json({
             success: true,
             message: "Successfully posted",
             data: {
-                postId: result[0].insertId,
+                postId: postId,
             },
         } as GeneralServerResponse<{ postId: number }>)
     } catch (error) {

@@ -20,6 +20,7 @@ import likesRoute from "./posts/likes"
 import reportRoute from "./posts/report"
 import boardInfoRoute from "./posts/boardInfo"
 import trendPostsRoute from "./posts/trendPosts"
+import uploadRoute from "./posts/upload"
 
 import myCommentListRoute from "./comments/myCommentList"
 import commentinfoRoute from "./comments/commentList"
@@ -70,6 +71,7 @@ app.use("/api/users/register", registerRoute)
 app.use("/api/users/refreshAccessToken", refreshAccessTokenRoute)
 app.use("/api/posts/boardInfo", boardInfoRoute)
 app.use("/api/posts/trendPosts", trendPostsRoute)
+app.use("/api/posts/upload", uploadRoute)
 
 app.use(validateToken)
 app.use("/api/users/deactivate", deactivateRoute)
