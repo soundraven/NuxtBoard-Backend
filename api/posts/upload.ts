@@ -1,25 +1,20 @@
 import express, { Request, Response } from "express"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
-import { RowDataPacket } from "mysql2"
-import { convertToCamelcase } from "../utils/convertToCamelcase"
-import dayjs from "dayjs"
 import multer from "multer"
 import path from "path"
+import { FileUrls, GeneralServerResponse } from "../structure/interface"
 
-// 환경 변수 설정
 dotenv.config()
 
 const router = express.Router()
 
-// Multer 설정
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(process.cwd(), "uploads")) // 파일이 저장될 디렉터리
+        cb(null, path.join(process.cwd(), "uploads"))
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`) // 파일명을 현재 시간과 원본 이름으로 설정
+        cb(null, `${Date.now()}-${file.originalname}`)
     },
 })
 
@@ -32,7 +27,6 @@ router.post("/", upload.array("file", 10), (req: Request, res: Response) => {
             return res.status(400).json({ message: "No files were uploaded." })
         }
 
-        // 파일 URL 생성
         const fileUrls = files.map((file) => {
             const url = `${req.protocol}://${req.get("host")}/uploads/${
                 file.filename
@@ -43,11 +37,13 @@ router.post("/", upload.array("file", 10), (req: Request, res: Response) => {
             }
         })
 
-        // 파일이 성공적으로 업로드되었음을 응답
         res.status(200).json({
+            success: true,
             message: "File(s) uploaded successfully",
-            files: fileUrls,
-        })
+            data: {
+                files: fileUrls,
+            },
+        } as GeneralServerResponse<{ files: FileUrls[] }>)
     } catch (error) {
         return errorHandler(res, "File upload failed", 500, error)
     }

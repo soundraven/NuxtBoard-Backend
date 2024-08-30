@@ -40,6 +40,11 @@ interface PostInfo {
     files: string[]
 }
 
+interface FileUrls {
+    originalName: string
+    url: string
+}
+
 interface GroupedPost {
     [key: number]: PostInfo[]
 }
@@ -86,4 +91,5 @@ export type {
     BoardInfo,
     LikeInfo,
     LikedHistory,
+    FileUrls,
 }
