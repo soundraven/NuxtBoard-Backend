@@ -1,7 +1,7 @@
 const corsOptions = {
-    origin: "*",
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "requiresToken"],
+  origin: "https://nuxt-board-frontend.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization", "requiresToken"],
 }
 
 export default corsOptions
