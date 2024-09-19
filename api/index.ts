@@ -12,7 +12,7 @@ import setUsernameRoute from "./users/setUsername"
 import refreshAccessTokenRoute from "./users/refreshAccessToken"
 
 import postListRoute from "./posts/list"
-import postInfoRoute from "./posts/postInfo_temp"
+import postInfoRoute from "./posts/postInfo"
 import postWriteRoute from "./posts/write"
 import postEditRoute from "./posts/edit"
 import postDeleteRoute from "./posts/delete"
