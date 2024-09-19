@@ -26,26 +26,26 @@ router.get("/:id", async (req: Request, res: Response) => {
     const [postInfoResult, likeInfoResult, fileUrlsResult] = await Promise.all([
       connection.query<RowDataPacket[]>(
         `SELECT 
-                    post.*,
-                    board_info.board_name,
-                    user_info.user_name AS registered_by_user_name
-                FROM 
-                    post
-                LEFT JOIN 
-                    board_info ON post.board_id = board_info.board_id
-                LEFT JOIN
-                    user_info ON post.registered_by = user_info.id
-                WHERE
-                    post.id = ?`,
+            post.*,
+            board_info.board_name,
+            user_info.user_name AS registered_by_user_name
+        FROM 
+            post
+        LEFT JOIN 
+            board_info ON post.board_id = board_info.board_id
+        LEFT JOIN
+            user_info ON post.registered_by = user_info.id
+        WHERE
+            post.id = ?`,
         [postId]
       ),
       connection.query<RowDataPacket[]>(
         `SELECT 
-                    SUM(liked) AS total_likes, SUM(disliked) AS total_dislikes
-                FROM 
-                    like_info 
-                WHERE 
-                    post_id = ?`,
+            SUM(liked) AS total_likes, SUM(disliked) AS total_dislikes
+        FROM 
+            like_info 
+        WHERE 
+            post_id = ?`,
         [postId]
       ),
       connection.query<RowDataPacket[]>(
