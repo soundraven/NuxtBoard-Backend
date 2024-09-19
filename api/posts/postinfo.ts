@@ -50,11 +50,11 @@ router.get("/:id", async (req: Request, res: Response) => {
       ),
       connection.query<RowDataPacket[]>(
         `SELECT 
-                    file_url
-                FROM 
-                    post_file
-                WHERE 
-                    post_id = ? AND active = 1`,
+            file_url
+        FROM 
+            post_file
+        WHERE 
+            post_id = ? AND active = 1`,
         [postId]
       ),
     ])
