@@ -10,29 +10,29 @@ dotenv.config()
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-    if (!connection) {
-        return errorHandler(res, "Database connection not available")
-    }
+  if (!connection) {
+    return errorHandler(res, "Database connection not available")
+  }
 
-    if (res.locals.validatedUser.user.id !== req.body.user.id) {
-        return errorHandler(res, "Validation failed.", 401)
-    }
+  if (res.locals.validatedUser.user.id !== req.body.user.id) {
+    return errorHandler(res, "Validation failed.", 401)
+  }
 
-    try {
-        const { user, userName } = req.body
+  try {
+    const { user, userName } = req.body
 
-        await connection.execute<RowDataPacket[]>(
-            `UPDATE user_info SET user_name = ? WHERE id = ?`,
-            [userName, user.id]
-        )
+    await connection.query<RowDataPacket[]>(
+      `UPDATE user_info SET user_name = ? WHERE id = ?`,
+      [userName, user.id]
+    )
 
-        res.status(200).json({
-            success: true,
-            message: "UserName set success.",
-        } as GeneralServerResponse)
-    } catch (error) {
-        return errorHandler(res, "An unexpected error occurred.", 500, error)
-    }
+    res.status(200).json({
+      success: true,
+      message: "UserName set success.",
+    } as GeneralServerResponse)
+  } catch (error) {
+    return errorHandler(res, "An unexpected error occurred.", 500, error)
+  }
 })
 
 export default router

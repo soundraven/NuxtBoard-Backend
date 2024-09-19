@@ -8,15 +8,15 @@ import { GeneralServerResponse, PostInfo } from "../structure/interface"
 const router = express.Router()
 
 router.get("/", async (req: Request, res: Response) => {
-    if (!connection) {
-        return errorHandler(res, "Database connection not available")
-    }
+  if (!connection) {
+    return errorHandler(res, "Database connection not available")
+  }
 
-    try {
-        const sevenDaysAgo = dayjs().subtract(7, "day").format("YYYY-MM-DD")
-        const { boardId } = req.query
+  try {
+    const sevenDaysAgo = dayjs().subtract(7, "day").format("YYYY-MM-DD")
+    const { boardId } = req.query
 
-        let getTrendPostsQuery = `
+    let getTrendPostsQuery = `
             SELECT 
                 p.id as post_id
             FROM 
@@ -32,19 +32,17 @@ router.get("/", async (req: Request, res: Response) => {
             LIMIT 5
         `
 
-        const [trendPostsResult] = await connection.execute<RowDataPacket[]>(
-            getTrendPostsQuery,
-            [sevenDaysAgo]
-        )
+    const [trendPostsResult] = await connection.query<RowDataPacket[]>(
+      getTrendPostsQuery,
+      [sevenDaysAgo]
+    )
 
-        const trendPosts = trendPostsResult.map((row) => row.post_id)
-        const trendPostsDetails = []
+    const trendPosts = trendPostsResult.map((row) => row.post_id)
+    const trendPostsDetails = []
 
-        for (const postId of trendPosts) {
-            const [postDetailsResult] = await connection.execute<
-                RowDataPacket[]
-            >(
-                `
+    for (const postId of trendPosts) {
+      const [postDetailsResult] = await connection.query<RowDataPacket[]>(
+        `
                 SELECT 
                     id, title, registered_date
                 FROM 
@@ -52,20 +50,20 @@ router.get("/", async (req: Request, res: Response) => {
                 WHERE 
                     id = ?
                 `,
-                [postId]
-            )
+        [postId]
+      )
 
-            if (postDetailsResult.length > 0) {
-                const postDetail = postDetailsResult[0]
-                trendPostsDetails.push({
-                    id: postDetail.id,
-                    title: postDetail.title,
-                    registeredDate: postDetail.registered_date,
-                })
-            }
-        }
+      if (postDetailsResult.length > 0) {
+        const postDetail = postDetailsResult[0]
+        trendPostsDetails.push({
+          id: postDetail.id,
+          title: postDetail.title,
+          registeredDate: postDetail.registered_date,
+        })
+      }
+    }
 
-        let currentBoardTrendQuery = `
+    let currentBoardTrendQuery = `
             SELECT 
                 post.id
             FROM 
@@ -81,21 +79,20 @@ router.get("/", async (req: Request, res: Response) => {
             LIMIT 5
         `
 
-        let currentBoardTrendDetails = []
-        if (boardId) {
-            const [currentBoardTrendResult] = await connection.execute<
-                RowDataPacket[]
-            >(currentBoardTrendQuery, [sevenDaysAgo, boardId])
+    let currentBoardTrendDetails = []
+    if (boardId) {
+      const [currentBoardTrendResult] = await connection.query<RowDataPacket[]>(
+        currentBoardTrendQuery,
+        [sevenDaysAgo, boardId]
+      )
 
-            const currentBoardTrendPosts = currentBoardTrendResult.map(
-                (row) => row.id
-            )
+      const currentBoardTrendPosts = currentBoardTrendResult.map(
+        (row) => row.id
+      )
 
-            for (const postId of currentBoardTrendPosts) {
-                const [postDetailsResult] = await connection.execute<
-                    RowDataPacket[]
-                >(
-                    `
+      for (const postId of currentBoardTrendPosts) {
+        const [postDetailsResult] = await connection.query<RowDataPacket[]>(
+          `
                     SELECT
                         id, title, registered_date
                     FROM
@@ -103,31 +100,31 @@ router.get("/", async (req: Request, res: Response) => {
                     WHERE
                         id = ?
                     `,
-                    [postId]
-                )
+          [postId]
+        )
 
-                if (postDetailsResult.length > 0) {
-                    const postDetail = postDetailsResult[0]
-                    currentBoardTrendDetails.push({
-                        id: postDetail.id,
-                        title: postDetail.title,
-                        registeredDate: postDetail.registered_date,
-                    })
-                }
-            }
+        if (postDetailsResult.length > 0) {
+          const postDetail = postDetailsResult[0]
+          currentBoardTrendDetails.push({
+            id: postDetail.id,
+            title: postDetail.title,
+            registeredDate: postDetail.registered_date,
+          })
         }
-
-        res.status(200).json({
-            success: true,
-            message: "Successfully fetched top liked posts",
-            data: {
-                trendPosts: trendPostsDetails,
-                currentBoardTrendPosts: currentBoardTrendDetails,
-            },
-        } as GeneralServerResponse<{ trendPosts: PostInfo[]; currentBoardTrendPosts: PostInfo[] }>)
-    } catch (error) {
-        return errorHandler(res, "An unexpected error occurred.", 500, error)
+      }
     }
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully fetched top liked posts",
+      data: {
+        trendPosts: trendPostsDetails,
+        currentBoardTrendPosts: currentBoardTrendDetails,
+      },
+    } as GeneralServerResponse<{ trendPosts: PostInfo[]; currentBoardTrendPosts: PostInfo[] }>)
+  } catch (error) {
+    return errorHandler(res, "An unexpected error occurred.", 500, error)
+  }
 })
 
 export default router

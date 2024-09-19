@@ -7,54 +7,54 @@ import { ResultSetHeader } from "mysql2"
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-    if (!connection) {
-        return errorHandler(res, "Database connection not available")
-    }
+  if (!connection) {
+    return errorHandler(res, "Database connection not available")
+  }
 
-    const { postId, comment, reply, commentId } = req.body
-    const registeredBy = res.locals.validatedUser.user.id
+  const { postId, comment, reply, commentId } = req.body
+  const registeredBy = res.locals.validatedUser.user.id
 
-    if (commentId) {
-        try {
-            const result = await connection.execute<ResultSetHeader>(
-                `INSERT INTO 
+  if (commentId) {
+    try {
+      const result = await connection.query<ResultSetHeader>(
+        `INSERT INTO 
                     reply (post_id, comment_id, content, registered_by) 
                 VALUES (?, ?, ?, ?)`,
-                [postId, commentId, reply, registeredBy]
-            )
+        [postId, commentId, reply, registeredBy]
+      )
 
-            if (result[0].affectedRows < 1) {
-                errorHandler(res, "Failed to post.", 500)
-            }
+      if (result[0].affectedRows < 1) {
+        errorHandler(res, "Failed to post.", 500)
+      }
 
-            return res.status(200).json({
-                success: true,
-                message: "Successfully posted",
-            } as GeneralServerResponse)
-        } catch (error) {
-            errorHandler(res, "An unexpected error occurred.")
-        }
+      return res.status(200).json({
+        success: true,
+        message: "Successfully posted",
+      } as GeneralServerResponse)
+    } catch (error) {
+      errorHandler(res, "An unexpected error occurred.")
     }
+  }
 
-    try {
-        const result = await connection.execute<ResultSetHeader>(
-            `INSERT INTO 
+  try {
+    const result = await connection.query<ResultSetHeader>(
+      `INSERT INTO 
                 comment (post_id, content, registered_by) 
             VALUES (?, ?, ?)`,
-            [postId, comment, registeredBy]
-        )
+      [postId, comment, registeredBy]
+    )
 
-        if (result[0].affectedRows < 1) {
-            errorHandler(res, "Failed to post.", 500)
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Successfully posted",
-        } as GeneralServerResponse)
-    } catch (error) {
-        return errorHandler(res, "An unexpected error occurred.", 500, error)
+    if (result[0].affectedRows < 1) {
+      errorHandler(res, "Failed to post.", 500)
     }
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully posted",
+    } as GeneralServerResponse)
+  } catch (error) {
+    return errorHandler(res, "An unexpected error occurred.", 500, error)
+  }
 })
 
 export default router
