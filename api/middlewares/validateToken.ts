@@ -10,53 +10,53 @@ import { convertToCamelcase } from "../utils/convertToCamelcase"
 dotenv.config()
 
 export default async function validateToken(
-    req: Request,
-    res: Response,
-    next: NextFunction
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) {
-    if (!connection) {
-        return errorHandler(res, "Database connection not available")
+  if (!connection) {
+    return errorHandler(res, "Database connection not available")
+  }
+
+  console.log("middlewares")
+
+  const token = req.headers["authorization"]?.split(" ")[1] || ""
+  console.log(token)
+
+  if (!token) {
+    return errorHandler(res, "Auth failed", 401)
+  }
+
+  console.log("middlewares2")
+
+  try {
+    console.log("시작")
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    ) as jwt.JwtPayload
+
+    const userId = decoded.id
+    console.log("validateUserId:", userId)
+
+    const [user] = await connection.query<UserInfo[] & RowDataPacket[]>(
+      `SELECT id, email, user_name, registered_date, active FROM user_info WHERE id = ?`,
+      [userId]
+    )
+
+    if (user.length < 1) {
+      return errorHandler(res, "User not exist", 404)
     }
 
-    console.log("middlewares")
-
-    const token = req.headers["authorization"]?.split(" ")[1] || ""
-    console.log(token)
-
-    if (!token) {
-        return errorHandler(res, "Auth failed", 401)
+    if (user[0].active === 0) {
+      return errorHandler(res, "Already resigned user", 410)
     }
 
-    console.log("middlewares2")
+    const camelcaseUser = convertToCamelcase<UserInfo>(user[0])
 
-    try {
-        console.log("시작")
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET as string
-        ) as jwt.JwtPayload
-
-        const userId = decoded.id
-        console.log("validateUserId:", userId)
-
-        const [user] = await connection.execute<UserInfo[] & RowDataPacket[]>(
-            `SELECT id, email, user_name, registered_date, active FROM user_info WHERE id = ?`,
-            [userId]
-        )
-
-        if (user.length < 1) {
-            return errorHandler(res, "User not exist", 404)
-        }
-
-        if (user[0].active === 0) {
-            return errorHandler(res, "Already resigned user", 410)
-        }
-
-        const camelcaseUser = convertToCamelcase<UserInfo>(user[0])
-
-        res.locals.validatedUser = { user: camelcaseUser, token: token }
-        next()
-    } catch (error) {
-        return errorHandler(res, "An unexpected error occurred.", 500, error)
-    }
+    res.locals.validatedUser = { user: camelcaseUser, token: token }
+    next()
+  } catch (error) {
+    return errorHandler(res, "An unexpected error occurred.", 500, error)
+  }
 }

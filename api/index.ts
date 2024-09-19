@@ -41,23 +41,23 @@ app.options("*", cors(corsOptions))
 app.use(express.json())
 
 app.listen(process.env.DB_PORT, () => {
-    console.log(`open server ${process.env.DB_PORT}`)
+  console.log(`open server ${process.env.DB_PORT}`)
 })
 
 async function startServer() {
-    try {
-        connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_DATABASE,
-        })
+  try {
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+    })
 
-        console.log("DB Connection success")
-    } catch (error) {
-        console.error("DB Connection failed:", error)
-        process.exit(1)
-    }
+    console.log("DB Connection success")
+  } catch (error) {
+    console.error("DB Connection failed:", error)
+    process.exit(1)
+  }
 }
 
 export let connection: Connection | null = null
