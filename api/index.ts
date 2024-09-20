@@ -40,7 +40,7 @@ app.use(cors())
 
 app.use(express.json())
 
-app.listen(process.env.DB_PORT, () => {
+app.listen(process.env.PORT, () => {
   console.log(`open server ${process.env.DB_PORT}`)
 })
 
