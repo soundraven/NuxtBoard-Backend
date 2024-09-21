@@ -1,6 +1,5 @@
 import express from "express"
 import cors from "cors"
-import corsOptions from "./config/corsOptions"
 import mysql, { Connection } from "mysql2/promise"
 import dotenv from "dotenv"
 
@@ -24,7 +23,7 @@ import uploadRoute from "./posts/upload"
 import downloadRoute from "./posts/download"
 
 import myCommentListRoute from "./comments/myCommentList"
-import commentinfoRoute from "./comments/commentList"
+import commentInfoRoute from "./comments/commentList"
 import commentWriteRoute from "./comments/write"
 import commentEditRoute from "./comments/edit"
 import commentDeleteRoute from "./comments/delete"
@@ -36,12 +35,10 @@ dotenv.config()
 const app = express()
 
 app.use(cors())
-// app.options("*", cors(corsOptions)
-
 app.use(express.json())
 
 app.listen(process.env.PORT, () => {
-  console.log(`open server ${process.env.DB_PORT}`)
+  console.log(`open server ${process.env.PORT}`)
 })
 
 async function startServer() {
@@ -66,7 +63,7 @@ startServer()
 
 app.use("/api/posts/list", postListRoute)
 app.use("/api/posts/postInfo", postInfoRoute)
-app.use("/api/comments/commentList", commentinfoRoute)
+app.use("/api/comments/commentList", commentInfoRoute)
 app.use("/api/users/login", loginRoute)
 app.use("/api/users/register", registerRoute)
 app.use("/api/users/refreshAccessToken", refreshAccessTokenRoute)
