@@ -25,7 +25,6 @@ router.get("/:id", async (req: Request, res: Response) => {
 
   try {
     const postId = req.params.id
-    console.log(postId)
 
     const [commentListResult, replyListResult] = await Promise.all([
       connection.query<CommentInfo[] & RowDataPacket[]>(
@@ -86,8 +85,6 @@ router.get("/:id", async (req: Request, res: Response) => {
         (reply) => reply.commentId === comment.id
       ),
     }))
-
-    console.log(mappedCommentList)
 
     res.status(200).json({
       success: true,

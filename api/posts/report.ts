@@ -23,7 +23,6 @@ router.post("/", async (req: Request, res: Response) => {
       `SELECT * FROM report WHERE post_id = ? AND reported_by = ?`,
       [postId, reportedBy]
     )
-    console.log(checkHistory)
 
     if (checkHistory.length > 0) {
       return errorHandler(res, "Already reported this post.", 409)

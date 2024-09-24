@@ -68,7 +68,7 @@ router.get("/:id", async (req: Request, res: Response) => {
       ),
       files: fileUrlsResult[0].map((row) => row.file_url), // 파일 URL을 배열로 추가
     }
-    console.log(fileUrlsResult)
+
     const likeInfo = convertToCamelcase(likeInfoResult[0][0]) as LikeInfo
 
     if (likeInfo.totalLikes === null || likeInfo.totalDislikes === null) {

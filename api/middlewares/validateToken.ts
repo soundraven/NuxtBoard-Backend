@@ -18,26 +18,19 @@ export default async function validateToken(
     return errorHandler(res, "Database connection not available")
   }
 
-  console.log("middlewares")
-
   const token = req.headers["authorization"]?.split(" ")[1] || ""
-  console.log(token)
 
   if (!token) {
     return errorHandler(res, "Auth failed", 401)
   }
 
-  console.log("middlewares2")
-
   try {
-    console.log("시작")
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string
     ) as jwt.JwtPayload
 
     const userId = decoded.id
-    console.log("validateUserId:", userId)
 
     const [user] = await connection.query<UserInfo[] & RowDataPacket[]>(
       `SELECT id, email, user_name, registered_date, active FROM user_info WHERE id = ?`,

@@ -6,7 +6,7 @@ import { RowDataPacket } from "mysql2"
 
 const router = express.Router()
 
-router.post("/like", async (req: Request, res: Response) => {
+router.post(["/like", "/dislike"], async (req: Request, res: Response) => {
   if (!connection) {
     return errorHandler(res, "Database connection not available")
   }
@@ -18,7 +18,9 @@ router.post("/like", async (req: Request, res: Response) => {
 
     const postId = req.body.postId
     const userId = res.locals.validatedUser.user.id
+    const action = req.path === "/like" ? "like" : "dislike"
 
+    // 현재 추천/비추천 상태 조회
     const [likedHistoryResult] = await connection.query<RowDataPacket[]>(
       `SELECT liked, disliked FROM like_info WHERE post_id = ? AND registered_by = ?`,
       [postId, userId]
@@ -26,70 +28,41 @@ router.post("/like", async (req: Request, res: Response) => {
 
     const likedHistory = likedHistoryResult[0] as LikedHistory | undefined
 
-    if (likedHistory && likedHistory.liked === 1) {
+    if (action === "like" && likedHistory?.liked === 1) {
       return errorHandler(res, "Already liked", 409)
     }
 
-    if (likedHistory) {
-      await connection.query(
-        `UPDATE like_info SET liked = ? WHERE post_id = ? AND registered_by = ?`,
-        [1, postId, userId]
-      )
-    }
-
-    await connection.query(
-      `INSERT INTO like_info (post_id, registered_by, liked) VALUES (?, ?, ?)`,
-      [postId, userId, 1]
-    )
-
-    res.status(200).json({
-      success: true,
-      message: "Successfully liked.",
-    } as GeneralServerResponse)
-  } catch (error) {
-    return errorHandler(res, "An unexpected error occurred.", 500, error)
-  }
-})
-
-router.post("/dislike", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
-  }
-
-  try {
-    if (res.locals.validatedUser.user.id !== req.body.user.id) {
-      return errorHandler(res, "Validation failed", 401)
-    }
-
-    const postId = req.body.postId
-    const userId = res.locals.validatedUser.user.id
-
-    const [likedHistoryResult] = await connection.query<RowDataPacket[]>(
-      `SELECT liked, disliked FROM like_info WHERE post_id = ? AND registered_by = ?`,
-      [postId, userId]
-    )
-
-    const likedHistory = likedHistoryResult[0] as LikedHistory | undefined
-
-    if (likedHistory && likedHistory.disliked === 1) {
+    if (action === "dislike" && likedHistory?.disliked === 1) {
       return errorHandler(res, "Already disliked", 409)
     }
 
     if (likedHistory) {
+      if (action === "like") {
+        await connection.query(
+          `UPDATE like_info SET liked = 1 WHERE post_id = ? AND registered_by = ?`,
+          [postId, userId]
+        )
+      } else {
+        await connection.query(
+          `UPDATE like_info SET disliked = 1 WHERE post_id = ? AND registered_by = ?`,
+          [postId, userId]
+        )
+      }
+    } else {
       await connection.query(
-        `UPDATE like_info SET disliked = ? WHERE post_id = ? AND registered_by = ?`,
-        [1, postId, userId]
+        `INSERT INTO like_info (post_id, registered_by, liked, disliked) VALUES (?, ?, ?, ?)`,
+        [
+          postId,
+          userId,
+          action === "like" ? 1 : 0,
+          action === "dislike" ? 1 : 0,
+        ]
       )
     }
 
-    await connection.query(
-      `INSERT INTO like_info (post_id, registered_by, disliked) VALUES (?, ?, ?)`,
-      [postId, userId, 1]
-    )
-
     res.status(200).json({
       success: true,
-      message: "Successfully disliked.",
+      message: `Successfully ${action}d.`,
     } as GeneralServerResponse)
   } catch (error) {
     return errorHandler(res, "An unexpected error occurred.", 500, error)
