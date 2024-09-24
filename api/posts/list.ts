@@ -9,7 +9,12 @@ import { errorHandler } from "../utils/errorhandler"
 import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
 import { convertArrayToCamelcase } from "../utils/convertToCamelcase"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 dotenv.config()
 
@@ -93,9 +98,9 @@ router.get("/", async (req: Request, res: Response) => {
     )
 
     const postListWithFormattedDate = postList.map((post) => {
-      const formattedDate = dayjs(post.registeredDate).format(
-        "YYYY-MM-DD HH:mm:ss"
-      )
+      const formattedDate = dayjs(post.registeredDate)
+        .tz("Asia/Seoul")
+        .format("YYYY-MM-DD HH:mm:ss")
 
       return {
         ...post,
@@ -108,6 +113,7 @@ router.get("/", async (req: Request, res: Response) => {
       if (!acc[key]) {
         acc[key] = []
       }
+
       acc[key].push(post)
       return acc
     }, {} as Record<number, PostInfo[]>)
@@ -116,7 +122,9 @@ router.get("/", async (req: Request, res: Response) => {
       const numberKey = Number(key)
       groupedPost[numberKey] = groupedPost[numberKey].map((item) => ({
         ...item,
-        formattedDate: dayjs(item.registeredDate).format("YYYY-MM-DD HH:mm:ss"),
+        formattedDate: dayjs(item.registeredDate)
+          .tz("Asia/Seoul")
+          .format("YYYY-MM-DD HH:mm:ss"),
       }))
     })
 

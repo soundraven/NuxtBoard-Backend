@@ -10,6 +10,11 @@ import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import { convertToCamelcase } from "../utils/convertToCamelcase"
 import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 dotenv.config()
 
@@ -26,35 +31,35 @@ router.get("/:id", async (req: Request, res: Response) => {
     const [postInfoResult, likeInfoResult, fileUrlsResult] = await Promise.all([
       connection.query<RowDataPacket[]>(
         `SELECT 
-            post.*,
-            board_info.board_name,
-            user_info.user_name AS registered_by_user_name
+          post.*,
+          board_info.board_name,
+          user_info.user_name AS registered_by_user_name
         FROM 
-            post
+          post
         LEFT JOIN 
-            board_info ON post.board_id = board_info.board_id
+          board_info ON post.board_id = board_info.board_id
         LEFT JOIN
-            user_info ON post.registered_by = user_info.id
+          user_info ON post.registered_by = user_info.id
         WHERE
-            post.id = ?`,
+          post.id = ?`,
         [postId]
       ),
       connection.query<RowDataPacket[]>(
         `SELECT 
-            SUM(liked) AS total_likes, SUM(disliked) AS total_dislikes
+          SUM(liked) AS total_likes, SUM(disliked) AS total_dislikes
         FROM 
-            like_info 
+          like_info 
         WHERE 
-            post_id = ?`,
+          post_id = ?`,
         [postId]
       ),
       connection.query<RowDataPacket[]>(
         `SELECT 
-            file_url
+          file_url
         FROM 
-            post_file
+          post_file
         WHERE 
-            post_id = ? AND active = 1`,
+          post_id = ? AND active = 1`,
         [postId]
       ),
     ])
@@ -63,10 +68,10 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     const postInfoWithFormattedDate: PostInfo = {
       ...postInfo,
-      formattedDate: dayjs(postInfo.registeredDate).format(
-        "YYYY-MM-DD HH:mm:ss"
-      ),
-      files: fileUrlsResult[0].map((row) => row.file_url), // 파일 URL을 배열로 추가
+      formattedDate: dayjs(postInfo.registeredDate)
+        .tz("Asia/Seoul")
+        .format("YYYY-MM-DD HH:mm:ss"),
+      files: fileUrlsResult[0].map((row) => row.file_url),
     }
 
     const likeInfo = convertToCamelcase(likeInfoResult[0][0]) as LikeInfo
