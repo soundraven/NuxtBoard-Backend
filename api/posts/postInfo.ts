@@ -10,11 +10,6 @@ import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import { convertToCamelcase } from "../utils/convertToCamelcase"
 import dayjs from "dayjs"
-import utc from "dayjs/plugin/utc"
-import timezone from "dayjs/plugin/timezone"
-
-dayjs.extend(utc)
-dayjs.extend(timezone)
 
 dotenv.config()
 
@@ -68,9 +63,9 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     const postInfoWithFormattedDate: PostInfo = {
       ...postInfo,
-      formattedDate: dayjs(postInfo.registeredDate)
-        .tz("Asia/Seoul")
-        .format("YYYY-MM-DD HH:mm:ss"),
+      formattedDate: dayjs(postInfo.registeredDate).format(
+        "YYYY-MM-DD HH:mm:ss"
+      ),
       files: fileUrlsResult[0].map((row) => row.file_url),
     }
 

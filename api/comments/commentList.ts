@@ -10,11 +10,6 @@ import { connection } from "../index"
 import { RowDataPacket } from "mysql2"
 import { convertArrayToCamelcase } from "../utils/convertToCamelcase"
 import dayjs from "dayjs"
-import utc from "dayjs/plugin/utc"
-import timezone from "dayjs/plugin/timezone"
-
-dayjs.extend(utc)
-dayjs.extend(timezone)
 
 dotenv.config()
 
@@ -62,9 +57,9 @@ router.get("/:id", async (req: Request, res: Response) => {
     const commentInfoWithFormattedDate = commentList.map((commentInfo) => {
       return {
         ...commentInfo,
-        formattedDate: dayjs(commentInfo.registeredDate)
-          .tz("Asia/Seoul")
-          .format("YYYY-MM-DD HH:mm:ss"),
+        formattedDate: dayjs(commentInfo.registeredDate).format(
+          "YYYY-MM-DD HH:mm:ss"
+        ),
       }
     })
 
@@ -75,9 +70,9 @@ router.get("/:id", async (req: Request, res: Response) => {
     const replyListWithFormattedDate = replyList.map((replyList) => {
       return {
         ...replyList,
-        formattedDate: dayjs(replyList.registeredDate)
-          .tz("Asia/Seoul")
-          .format("YYYY-MM-DD HH:mm:ss"),
+        formattedDate: dayjs(replyList.registeredDate).format(
+          "YYYY-MM-DD HH:mm:ss"
+        ),
       }
     })
 

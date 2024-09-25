@@ -20,7 +20,6 @@ router.post(["/like", "/dislike"], async (req: Request, res: Response) => {
     const userId = res.locals.validatedUser.user.id
     const action = req.path === "/like" ? "like" : "dislike"
 
-    // 현재 추천/비추천 상태 조회
     const [likedHistoryResult] = await connection.query<RowDataPacket[]>(
       `SELECT liked, disliked FROM like_info WHERE post_id = ? AND registered_by = ?`,
       [postId, userId]
