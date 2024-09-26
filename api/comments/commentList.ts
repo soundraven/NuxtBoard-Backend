@@ -6,7 +6,7 @@ import {
 } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { RowDataPacket } from "mysql2"
 import { convertArrayToCamelcase } from "../utils/convertToCamelcase"
 import dayjs from "dayjs"
@@ -16,15 +16,15 @@ dotenv.config()
 const router = express.Router()
 
 router.get("/:id", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
     const postId = req.params.id
 
     const [commentListResult, replyListResult] = await Promise.all([
-      connection.query<CommentInfo[] & RowDataPacket[]>(
+      pool.query<CommentInfo[] & RowDataPacket[]>(
         `SELECT 
                     comment.*,
                     user_info.user_name
@@ -36,7 +36,7 @@ router.get("/:id", async (req: Request, res: Response) => {
                     post_id = ? AND comment.active = 1`,
         [postId]
       ),
-      connection.query<ReplyInfo[] & RowDataPacket[]>(
+      pool.query<ReplyInfo[] & RowDataPacket[]>(
         `SELECT 
                     reply.*,
                     user_info.user_name

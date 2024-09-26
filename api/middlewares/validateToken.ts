@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import { UserInfo } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { RowDataPacket } from "mysql2"
 import dotenv from "dotenv"
 import jwt from "jsonwebtoken"
@@ -14,8 +14,8 @@ export default async function validateToken(
   res: Response,
   next: NextFunction
 ) {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   const token = req.headers["authorization"]?.split(" ")[1] || ""
@@ -32,7 +32,7 @@ export default async function validateToken(
 
     const userId = decoded.id
 
-    const [user] = await connection.query<UserInfo[] & RowDataPacket[]>(
+    const [user] = await pool.query<UserInfo[] & RowDataPacket[]>(
       `SELECT id, email, user_name, registered_date, active FROM user_info WHERE id = ?`,
       [userId]
     )

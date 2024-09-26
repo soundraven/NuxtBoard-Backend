@@ -6,7 +6,7 @@ import {
 } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { RowDataPacket } from "mysql2"
 import { convertToCamelcase } from "../utils/convertToCamelcase"
 import dayjs from "dayjs"
@@ -16,15 +16,15 @@ dotenv.config()
 const router = express.Router()
 
 router.get("/:id", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   const postId = req.params.id
 
   try {
     const [postInfoResult, likeInfoResult, fileUrlsResult] = await Promise.all([
-      connection.query<RowDataPacket[]>(
+      pool.query<RowDataPacket[]>(
         `SELECT 
           post.*,
           board_info.board_name,
@@ -39,7 +39,7 @@ router.get("/:id", async (req: Request, res: Response) => {
           post.id = ?`,
         [postId]
       ),
-      connection.query<RowDataPacket[]>(
+      pool.query<RowDataPacket[]>(
         `SELECT 
           SUM(liked) AS total_likes, SUM(disliked) AS total_dislikes
         FROM 
@@ -48,7 +48,7 @@ router.get("/:id", async (req: Request, res: Response) => {
           post_id = ?`,
         [postId]
       ),
-      connection.query<RowDataPacket[]>(
+      pool.query<RowDataPacket[]>(
         `SELECT 
           file_url
         FROM 

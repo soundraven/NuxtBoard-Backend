@@ -1,6 +1,6 @@
 import express from "express"
 import cors from "cors"
-import mysql, { Connection } from "mysql2/promise"
+import mysql, { Pool } from "mysql2/promise"
 import dotenv from "dotenv"
 
 import loginRoute from "./users/login"
@@ -41,23 +41,24 @@ app.listen(process.env.PORT || 8000, () => {
   console.log(`open server ${process.env.PORT}`)
 })
 
+export let pool: Pool | null = null
+
 async function startServer() {
   try {
-    connection = await mysql.createConnection({
+    pool = mysql.createPool({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
+      connectionLimit: 50,
     })
 
-    console.log("DB Connection success")
+    console.log("DB pool success")
   } catch (error) {
-    console.error("DB Connection failed:", error)
+    console.error("DB pool failed:", error)
     process.exit(1)
   }
 }
-
-export let connection: Connection | null = null
 
 startServer()
 

@@ -6,7 +6,7 @@ import {
 } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { RowDataPacket } from "mysql2"
 import dayjs from "dayjs"
 import { convertArrayToCamelcase } from "../utils/convertToCamelcase"
@@ -16,8 +16,8 @@ dotenv.config()
 const router = express.Router()
 
 router.get("/", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
@@ -78,12 +78,12 @@ router.get("/", async (req: Request, res: Response) => {
 
     params.push(listSize, pageSizeNum)
 
-    const [postListResult] = await connection.query<RowDataPacket[]>(
+    const [postListResult] = await pool.query<RowDataPacket[]>(
       getPostList,
       params
     )
 
-    const [countResult] = await connection.query<RowDataPacket[]>(
+    const [countResult] = await pool.query<RowDataPacket[]>(
       getCount,
       params.slice(0, -2)
     )

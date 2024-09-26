@@ -2,7 +2,7 @@ import express, { Request, Response } from "express"
 import { GeneralServerResponse } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { ResultSetHeader } from "mysql2"
 
 dotenv.config()
@@ -10,8 +10,8 @@ dotenv.config()
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
@@ -28,7 +28,7 @@ router.post("/", async (req: Request, res: Response) => {
       return errorHandler(res, "User auth not matched", 400)
     }
 
-    const [deactivate] = await connection.query<ResultSetHeader>(
+    const [deactivate] = await pool.query<ResultSetHeader>(
       `UPDATE user_info SET active = 0 WHERE id = ?`,
       [user.id]
     )

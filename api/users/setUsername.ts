@@ -2,7 +2,7 @@ import express, { Request, Response } from "express"
 import { GeneralServerResponse } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { RowDataPacket } from "mysql2"
 
 dotenv.config()
@@ -10,8 +10,8 @@ dotenv.config()
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   if (res.locals.validatedUser.user.id !== req.body.user.id) {
@@ -21,7 +21,7 @@ router.post("/", async (req: Request, res: Response) => {
   try {
     const { user, userName } = req.body
 
-    await connection.query<RowDataPacket[]>(
+    await pool.query<RowDataPacket[]>(
       `UPDATE user_info SET user_name = ? WHERE id = ?`,
       [userName, user.id]
     )

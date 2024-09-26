@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { connection } from "../index"
+import { pool } from "../index"
 import { errorHandler } from "../utils/errorhandler"
 import { RowDataPacket } from "mysql2"
 import dayjs from "dayjs"
@@ -8,8 +8,8 @@ import { GeneralServerResponse, PostInfo } from "../structure/interface"
 const router = express.Router()
 
 router.get("/", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
@@ -32,7 +32,7 @@ router.get("/", async (req: Request, res: Response) => {
             LIMIT 5
         `
 
-    const [trendPostsResult] = await connection.query<RowDataPacket[]>(
+    const [trendPostsResult] = await pool.query<RowDataPacket[]>(
       getTrendPostsQuery,
       [sevenDaysAgo]
     )
@@ -41,7 +41,7 @@ router.get("/", async (req: Request, res: Response) => {
     const trendPostsDetails = []
 
     for (const postId of trendPosts) {
-      const [postDetailsResult] = await connection.query<RowDataPacket[]>(
+      const [postDetailsResult] = await pool.query<RowDataPacket[]>(
         `
                 SELECT 
                     id, title, registered_date
@@ -81,7 +81,7 @@ router.get("/", async (req: Request, res: Response) => {
 
     let currentBoardTrendDetails = []
     if (boardId) {
-      const [currentBoardTrendResult] = await connection.query<RowDataPacket[]>(
+      const [currentBoardTrendResult] = await pool.query<RowDataPacket[]>(
         currentBoardTrendQuery,
         [sevenDaysAgo, boardId]
       )
@@ -91,7 +91,7 @@ router.get("/", async (req: Request, res: Response) => {
       )
 
       for (const postId of currentBoardTrendPosts) {
-        const [postDetailsResult] = await connection.query<RowDataPacket[]>(
+        const [postDetailsResult] = await pool.query<RowDataPacket[]>(
           `
                     SELECT
                         id, title, registered_date

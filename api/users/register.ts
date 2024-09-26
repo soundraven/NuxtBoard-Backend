@@ -3,7 +3,7 @@ import { GeneralServerResponse, NewUser } from "../structure/interface"
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { RowDataPacket } from "mysql2"
 
 dotenv.config()
@@ -11,8 +11,8 @@ dotenv.config()
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
@@ -27,7 +27,7 @@ router.post("/", async (req: Request, res: Response) => {
       .update(newUser.password + process.env.PWSALT)
       .digest("hex")
 
-    const [result] = await connection.query<RowDataPacket[]>(
+    const [result] = await pool.query<RowDataPacket[]>(
       `SELECT COUNT(email) AS count FROM user_info WHERE email = ?`,
       [newUser.email]
     )
@@ -36,7 +36,7 @@ router.post("/", async (req: Request, res: Response) => {
       return errorHandler(res, "Email already exist.", 409)
     }
 
-    await connection.query(
+    await pool.query(
       `INSERT INTO user_info (email, password, user_name) VALUES (?, ?, ?)`,
       [newUser.email, encryptedPassword, newUser.userName]
     )

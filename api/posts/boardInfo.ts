@@ -1,5 +1,5 @@
 import express from "express"
-import { connection } from "../index"
+import { pool } from "../index"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
 import { BoardInfo, GeneralServerResponse } from "../structure/interface"
@@ -10,14 +10,14 @@ dotenv.config()
 const router = express.Router()
 
 router.get("/", async (req, res) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
-    const [boardInfoResult] = await connection.query<
-      BoardInfo[] & RowDataPacket[]
-    >("SELECT board_id, board_name FROM board_info WHERE active = 1")
+    const [boardInfoResult] = await pool.query<BoardInfo[] & RowDataPacket[]>(
+      "SELECT board_id, board_name FROM board_info WHERE active = 1"
+    )
 
     const boardInfo = convertArrayToCamelcase(boardInfoResult)
 

@@ -2,7 +2,7 @@ import express, { Request, Response } from "express"
 import { CommentInfo, GeneralServerResponse } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { RowDataPacket } from "mysql2"
 import { convertArrayToCamelcase } from "../utils/convertToCamelcase"
 import dayjs from "dayjs"
@@ -12,14 +12,14 @@ dotenv.config()
 const router = express.Router()
 
 router.get("/:registeredBy", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
     const registeredBy = req.params.registeredBy
 
-    const [commentList] = await connection.query<RowDataPacket[]>(
+    const [commentList] = await pool.query<RowDataPacket[]>(
       `SELECT 
                 comment.*
             FROM 

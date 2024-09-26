@@ -1,14 +1,14 @@
 import express, { Request, Response } from "express"
 import { GeneralServerResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { ResultSetHeader } from "mysql2"
 
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
@@ -18,7 +18,7 @@ router.post("/", async (req: Request, res: Response) => {
 
     const postInfo = req.body.post
 
-    const result = await connection.query<ResultSetHeader>(
+    const result = await pool.query<ResultSetHeader>(
       `UPDATE post SET board_id = ?, title = ?, content = ? WHERE id = ?`,
       [postInfo.boardId, postInfo.title, postInfo.content, postInfo.id]
     )
@@ -27,14 +27,13 @@ router.post("/", async (req: Request, res: Response) => {
       return errorHandler(res, "Failed to update post.", 500)
     }
 
-    await connection.query(
-      `UPDATE post_file SET active = 0 WHERE post_id = ?`,
-      [postInfo.id]
-    )
+    await pool.query(`UPDATE post_file SET active = 0 WHERE post_id = ?`, [
+      postInfo.id,
+    ])
 
     if (postInfo.files && postInfo.files.length > 0) {
       const fileInsertPromises = postInfo.files.map((fileUrl: string) => {
-        return connection!.query(
+        return pool!.query(
           "INSERT INTO post_file (post_id, file_url) VALUES (?, ?)",
           [postInfo.id, fileUrl]
         )

@@ -1,14 +1,14 @@
 import express, { Request, Response } from "express"
 import { GeneralServerResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { RowDataPacket } from "mysql2"
 
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
@@ -19,7 +19,7 @@ router.post("/", async (req: Request, res: Response) => {
     const postId = req.body.postId
     const reportedBy = res.locals.validatedUser.user.id
 
-    const [checkHistory] = await connection.query<RowDataPacket[]>(
+    const [checkHistory] = await pool.query<RowDataPacket[]>(
       `SELECT * FROM report WHERE post_id = ? AND reported_by = ?`,
       [postId, reportedBy]
     )
@@ -29,22 +29,20 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     await Promise.all([
-      connection.query(
-        `INSERT INTO report (post_id, reported_by) VALUES (?, ?)`,
-        [postId, reportedBy]
-      ),
-      connection.query(`UPDATE post SET report = report + 1 WHERE id = ?`, [
+      pool.query(`INSERT INTO report (post_id, reported_by) VALUES (?, ?)`, [
         postId,
+        reportedBy,
       ]),
+      pool.query(`UPDATE post SET report = report + 1 WHERE id = ?`, [postId]),
     ])
 
-    const [reportCount] = await connection.query<RowDataPacket[]>(
+    const [reportCount] = await pool.query<RowDataPacket[]>(
       `SELECT report FROM post WHERE id = ?`,
       [postId]
     )
 
     if (reportCount[0].report >= 5) {
-      await connection.query<RowDataPacket[]>(
+      await pool.query<RowDataPacket[]>(
         `UPDATE post SET active = 0 WHERE id = ?`,
         [postId]
       )

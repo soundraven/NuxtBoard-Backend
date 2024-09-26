@@ -7,7 +7,7 @@ import {
 import crypto from "crypto"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { RowDataPacket } from "mysql2"
 import {
   accessTokenExpires,
@@ -21,8 +21,8 @@ dotenv.config()
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
@@ -37,9 +37,7 @@ router.post("/", async (req: Request, res: Response) => {
       .update(loginUser.password + process.env.PWSALT)
       .digest("hex")
 
-    const [dbUserInfo] = await connection.query<
-      LoginUserInfo[] & RowDataPacket[]
-    >(
+    const [dbUserInfo] = await pool.query<LoginUserInfo[] & RowDataPacket[]>(
       `SELECT id, email, password, user_name, active FROM user_info WHERE email = ?`,
       [loginUser.email]
     )
@@ -68,7 +66,7 @@ router.post("/", async (req: Request, res: Response) => {
       generateToken(user, accessTokenExpires, "access"),
     ])
 
-    await connection.query(
+    await pool.query(
       `INSERT INTO user_auth (token, registered_by, expires) VALUES (?, ?, FROM_UNIXTIME(?))`,
       [refreshToken, user.id, refreshTokenExpires]
     )

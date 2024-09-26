@@ -2,7 +2,7 @@ import express, { Request, Response } from "express"
 import { UserInfo, GeneralServerResponse } from "../structure/interface"
 import dotenv from "dotenv"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { RowDataPacket } from "mysql2"
 import { accessTokenExpires, generateToken } from "../utils/generateToken"
 import jwt from "jsonwebtoken"
@@ -13,8 +13,8 @@ dotenv.config()
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   try {
@@ -30,7 +30,7 @@ router.post("/", async (req: Request, res: Response) => {
     ) as jwt.JwtPayload
     const userId = decoded.id
 
-    const [dbUserInfo] = await connection.query<UserInfo[] & RowDataPacket[]>(
+    const [dbUserInfo] = await pool.query<UserInfo[] & RowDataPacket[]>(
       `SELECT id, email, user_name, registered_date, active FROM user_info WHERE id = ?`,
       [userId]
     )

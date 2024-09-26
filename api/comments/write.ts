@@ -1,14 +1,14 @@
 import express, { Request, Response } from "express"
 import { GeneralServerResponse } from "../structure/interface"
 import { errorHandler } from "../utils/errorhandler"
-import { connection } from "../index"
+import { pool } from "../index"
 import { ResultSetHeader } from "mysql2"
 
 const router = express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
-  if (!connection) {
-    return errorHandler(res, "Database connection not available")
+  if (!pool) {
+    return errorHandler(res, "Database pool not available")
   }
 
   const { postId, comment, reply, commentId } = req.body
@@ -16,7 +16,7 @@ router.post("/", async (req: Request, res: Response) => {
 
   if (commentId) {
     try {
-      const result = await connection.query<ResultSetHeader>(
+      const result = await pool.query<ResultSetHeader>(
         `INSERT INTO 
                     reply (post_id, comment_id, content, registered_by) 
                 VALUES (?, ?, ?, ?)`,
@@ -37,7 +37,7 @@ router.post("/", async (req: Request, res: Response) => {
   }
 
   try {
-    const result = await connection.query<ResultSetHeader>(
+    const result = await pool.query<ResultSetHeader>(
       `INSERT INTO 
                 comment (post_id, content, registered_by) 
             VALUES (?, ?, ?)`,
