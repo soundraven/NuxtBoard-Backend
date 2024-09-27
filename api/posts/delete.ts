@@ -21,7 +21,7 @@ router.post("/", async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: "Post successfully edited",
+      message: "Post successfully deleted",
     })
   } catch (error) {
     return errorHandler(res, "An unexpected error occurred.", 500, error)

@@ -14,14 +14,29 @@ router.post("/", async (req: Request, res: Response) => {
     return errorHandler(res, "Validation failed", 401)
   }
 
-  try {
-    const commentId = req.body.commentId
+  const { commentId, replyId } = req.body
 
-    await pool.query(`UPDATE comment SET active = 0 WHERE id = ?`, [commentId])
+  if (commentId) {
+    try {
+      await pool.query(`UPDATE comment SET active = 0 WHERE id = ?`, [
+        commentId,
+      ])
+
+      return res.status(200).json({
+        success: true,
+        message: "Comment successfully deleted",
+      } as GeneralServerResponse)
+    } catch (error) {
+      return errorHandler(res, "An unexpected error occurred.", 500, error)
+    }
+  }
+
+  try {
+    await pool.query(`UPDATE reply SET active = 0 WHERE id = ?`, [replyId])
 
     res.status(200).json({
       success: true,
-      message: "Comment successfully deleted",
+      message: "Reply successfully deleted",
     } as GeneralServerResponse)
   } catch (error) {
     return errorHandler(res, "An unexpected error occurred.", 500, error)

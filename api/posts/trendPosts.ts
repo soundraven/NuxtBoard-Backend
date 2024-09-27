@@ -24,7 +24,7 @@ router.get("/", async (req: Request, res: Response) => {
             JOIN 
                 like_info li ON p.id = li.post_id
             WHERE
-                p.registered_date >= ?
+                p.registered_date >= ? AND p.active = 1
             GROUP BY 
                 p.id
             ORDER BY 
@@ -71,7 +71,7 @@ router.get("/", async (req: Request, res: Response) => {
             JOIN 
                 like_info ON post.id = like_info.post_id
             WHERE
-                post.registered_date >= ? AND post.board_id = ?
+                post.registered_date >= ? AND post.board_id = ? AND post.active = 1
             GROUP BY 
                 post.id
             ORDER BY 
