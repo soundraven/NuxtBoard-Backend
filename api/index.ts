@@ -37,13 +37,15 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.listen(process.env.PORT || 8000, () => {
-  console.log(`open server ${process.env.PORT}`)
-})
+const startServer = () => {
+  app.listen(process.env.PORT || 8000, () => {
+    console.log(`Server is running on port ${process.env.PORT || 8000}`)
+  })
+}
 
 export let pool: Pool | null = null
 
-async function startServer() {
+async function connectToDatabase() {
   try {
     pool = mysql.createPool({
       host: process.env.DB_HOST,
@@ -53,14 +55,17 @@ async function startServer() {
       connectionLimit: 50,
     })
 
-    console.log("DB pool success")
+    const connection = await pool.getConnection()
+    console.log("Connected to MySQL database")
+    connection.release()
   } catch (error) {
-    console.error("DB pool failed:", error)
-    process.exit(1)
+    console.error("Failed to connect to MySQL. Retrying in 5 seconds...", error)
+    setTimeout(connectToDatabase, 5000)
   }
 }
 
 startServer()
+connectToDatabase()
 
 app.use("/api/posts/list", postListRoute)
 app.use("/api/posts/postInfo", postInfoRoute)
