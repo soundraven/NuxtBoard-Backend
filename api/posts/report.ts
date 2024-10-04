@@ -55,7 +55,8 @@ router.post("/", async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      message: "Post successfully reported",
+      message:
+        "Post successfully reported. If a post receives 5 reports, it will be automatically deleted.",
     } as GeneralServerResponse)
   } catch (error) {
     return errorHandler(res, "An unexpected error occurred.", 500, error)

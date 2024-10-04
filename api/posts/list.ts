@@ -28,7 +28,7 @@ router.get("/", async (req: Request, res: Response) => {
       boardId: string | undefined
     }
 
-    const currentPageNum = parseInt(currentPage) - 1 // 프론트에서 현재 페이지 1 기준 시작
+    const currentPageNum = parseInt(currentPage) - 1
     const pageSizeNum = parseInt(pageSize)
     const registeredByNum = registeredBy ? parseInt(registeredBy) : null
     const boardIdNum = boardId ? parseInt(boardId) : null
